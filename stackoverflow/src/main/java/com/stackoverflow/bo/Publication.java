@@ -32,6 +32,9 @@ public class Publication {
     @Column(name = "date_update")
     private LocalDateTime dateUpdated;
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @ManyToMany
     @JoinTable(
             name = "publication_tag",
