@@ -1,10 +1,12 @@
 package com.stackoverflow.dto.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-@Builder
 @Data
+@Builder
+@AllArgsConstructor
 public class UserResponse {
     private String name;
     private String surname;

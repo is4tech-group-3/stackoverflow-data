@@ -1,6 +1,5 @@
 package com.stackoverflow.service.publication;
 
-import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
 import com.stackoverflow.dto.publication.PublicationResponse;
 

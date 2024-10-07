@@ -94,7 +94,6 @@ public class PublicationServiceImpl implements PublicationService {
         publication.setTags(tags);
         publication.setDateUpdated(LocalDateTime.now());
         publicationRepository.save(publication);
-
         return PublicationResponse.builder()
                 .title(publication.getTitle())
                 .description(publication.getDescription())
