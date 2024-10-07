@@ -4,6 +4,8 @@ import com.stackoverflow.bo.Comment;
 import com.stackoverflow.dto.comment.CommentRequest;
 import com.stackoverflow.service.comment.CommentService;
 import lombok.AllArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +28,8 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Comment>> getComments(){
-        List<Comment> comments = commentService.getComments();
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+    public Page<Comment> getComments(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        return commentService.getComments(page, size);
     }
 
     @GetMapping("/{id}")
@@ -37,7 +38,6 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
-    //Pendiente
     @PutMapping("/{id}")
     public ResponseEntity<Comment> updateComment(@PathVariable("id") Long id, @RequestBody CommentRequest commentRequest){
         Comment comment = commentService.updateComment(id, commentRequest);
