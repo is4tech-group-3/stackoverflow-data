@@ -11,6 +11,7 @@ import java.util.Set;
 @Builder
 @Data
 public class PublicationResponse {
+    private Long idPublication;
     private String title;
     private String description;
     private LocalDateTime dateCreation;

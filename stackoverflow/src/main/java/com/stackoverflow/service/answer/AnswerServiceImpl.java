@@ -44,62 +44,20 @@ public class AnswerServiceImpl implements AnswerService {
                 .user(user)
                 .build();
         answerRepository.save(answer);
-        return AnswerResponse.builder()
-                .description(answer.getDescription())
-                .dateCreated(answer.getDateCreated())
-                .dateUpdated(answer.getDateUpdated())
-                .likes(answer.getLikes())
-                .verified(answer.getVerified())
-                .idQuestion(answer.getIdQuestion())
-                .author(
-                        new UserResponse(
-                                user.getName(),
-                                user.getSurname(),
-                                user.getUsername()
-                        )
-                )
-                .build();
+        return createAnswerResponse(answer);
     }
 
     @Override
     public List<AnswerResponse> getAnswersByQuestionId(Long idQuestion) {
         List<Answer> answers = answerRepository.findByIdQuestion(idQuestion);
-        return answers.stream().map(answer -> AnswerResponse.builder()
-                .description(answer.getDescription())
-                .dateCreated(answer.getDateCreated())
-                .dateUpdated(answer.getDateUpdated())
-                .likes(answer.getLikes())
-                .verified(answer.getVerified())
-                .idQuestion(answer.getIdQuestion())
-                .author(
-                        new UserResponse(
-                                answer.getUser().getName(),
-                                answer.getUser().getSurname(),
-                                answer.getUser().getUsername()
-                        )
-                )
-                .build()).collect(Collectors.toList());
+        return answers.stream().map(this::createAnswerResponse).collect(Collectors.toList());
     }
 
     @Override
     public AnswerResponse findAnswerById(Long idAnswer) {
         Answer answer = answerRepository.findById(idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
-        return AnswerResponse.builder()
-                .description(answer.getDescription())
-                .dateCreated(answer.getDateCreated())
-                .dateUpdated(answer.getDateUpdated())
-                .likes(answer.getLikes())
-                .verified(answer.getVerified())
-                .idQuestion(answer.getIdQuestion())
-                .author(
-                        new UserResponse(
-                                answer.getUser().getName(),
-                                answer.getUser().getSurname(),
-                                answer.getUser().getUsername()
-                        )
-                )
-                .build();
+        return createAnswerResponse(answer);
     }
 
     @Override
@@ -109,7 +67,17 @@ public class AnswerServiceImpl implements AnswerService {
         answer.setDescription(answerRequest.getDescription());
         answer.setDateUpdated(LocalDateTime.now());
         answerRepository.save(answer);
+        return createAnswerResponse(answer);
+    }
+
+    @Override
+    public void deleteAnswer(Long idAnswer) {
+        answerRepository.deleteById(idAnswer);
+    }
+
+    public AnswerResponse createAnswerResponse(Answer answer) {
         return AnswerResponse.builder()
+                .idAnswer(answer.getIdAnswer())
                 .description(answer.getDescription())
                 .dateCreated(answer.getDateCreated())
                 .dateUpdated(answer.getDateUpdated())
@@ -118,16 +86,12 @@ public class AnswerServiceImpl implements AnswerService {
                 .idQuestion(answer.getIdQuestion())
                 .author(
                         new UserResponse(
+                                answer.getUser().getId(),
                                 answer.getUser().getName(),
                                 answer.getUser().getSurname(),
                                 answer.getUser().getUsername()
                         )
                 )
                 .build();
-    }
-
-    @Override
-    public void deleteAnswer(Long idAnswer) {
-        answerRepository.deleteById(idAnswer);
     }
 }

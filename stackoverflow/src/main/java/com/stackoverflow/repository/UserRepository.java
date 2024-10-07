@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT new com.stackoverflow.dto.user.UserResponse(u.name, u.surname, u.username) FROM User u WHERE u.id = :id")
+    @Query("SELECT new com.stackoverflow.dto.user.UserResponse(u.id, u.name, u.surname, u.username) FROM User u WHERE u.id = :id")
     Optional<UserResponse> findUserResponseById(@Param("id") Long id);
 }
