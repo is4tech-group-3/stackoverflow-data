@@ -49,42 +49,22 @@ public class PublicationServiceImpl implements PublicationService {
                 .tags(tags)
                 .build();
         publicationRepository.save(publication);
-        return PublicationResponse.builder()
-                .title(publication.getTitle())
-                .description(publication.getDescription())
-                .dateCreation(publication.getDateCreation())
-                .dateUpdated(publication.getDateUpdated())
-                .author(userResponse)
-                .tags(publication.getTags())
-                .build();
+        return createPublicationResponse(publication);
     }
+
 
    @Override
     public Page<PublicationResponse> getPublications(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Publication> publications = publicationRepository.findAll(pageable);
-        return publications.map(publication -> PublicationResponse.builder()
-                .title(publication.getTitle())
-                .description(publication.getDescription())
-                .dateCreation(publication.getDateCreation())
-                .dateUpdated(publication.getDateUpdated())
-                .tags(publication.getTags())
-                .build());
+        return publications.stream().map(this::createPublicationResponse).collect(Collectors.toList());
     }
 
     @Override
     public PublicationResponse findPublicationById(Long idPublication) {
         Publication publication = publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
-        return PublicationResponse.builder()
-                .title(publication.getTitle())
-                .description(publication.getDescription())
-                .dateCreation(publication.getDateCreation())
-                .dateUpdated(publication.getDateUpdated())
-                .author(userRepository.findUserResponseById(publication.getUserId())
-                        .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + publication.getUserId())))
-                .tags(publication.getTags())
-                .build();
+        return createPublicationResponse(publication);
     }
 
     @Override
@@ -97,15 +77,7 @@ public class PublicationServiceImpl implements PublicationService {
         publication.setTags(tags);
         publication.setDateUpdated(LocalDateTime.now());
         publicationRepository.save(publication);
-        return PublicationResponse.builder()
-                .title(publication.getTitle())
-                .description(publication.getDescription())
-                .dateCreation(publication.getDateCreation())
-                .dateUpdated(publication.getDateUpdated())
-                .author(userRepository.findUserResponseById(publication.getUserId())
-                        .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + publication.getUserId())))
-                .tags(publication.getTags())
-                .build();
+        return createPublicationResponse(publication);
     }
 
     @Override
@@ -113,5 +85,20 @@ public class PublicationServiceImpl implements PublicationService {
         publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
         publicationRepository.deleteById(idPublication);
+    }
+
+    public PublicationResponse createPublicationResponse(Publication publication) {
+        return PublicationResponse.builder()
+                .idPublication(publication.getIdPublication())
+                .title(publication.getTitle())
+                .description(publication.getDescription())
+                .dateCreation(publication.getDateCreation())
+                .dateUpdated(publication.getDateUpdated())
+                .author(
+                        userRepository.findUserResponseById(publication.getUserId())
+                                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + publication.getUserId()))
+                )
+                .tags(publication.getTags())
+                .build();
     }
 }

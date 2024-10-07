@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 public class AnswerResponse {
+    private Long idAnswer;
     private String description;
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
