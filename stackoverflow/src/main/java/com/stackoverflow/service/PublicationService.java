@@ -3,10 +3,10 @@ package com.stackoverflow.service;
 import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface PublicationService {
-    List<Publication> getPublications();
+    Page<Publication> getPublications(int page, int size);
 
     Publication getPublication(Long idPublication);
 

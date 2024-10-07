@@ -3,10 +3,10 @@ package com.stackoverflow.service.comment;
 import com.stackoverflow.bo.Comment;
 import com.stackoverflow.dto.comment.CommentRequest;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface CommentService {
-    List<Comment> getComments();
+    Page<Comment> getComments(int page, int size);
     Comment getComment(Long idComment);
     Comment createComment(Long idPublication, CommentRequest commentRequest);
     Comment updateComment(Long idComment, CommentRequest commentRequest);

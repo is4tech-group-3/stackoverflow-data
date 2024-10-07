@@ -7,11 +7,14 @@ import com.stackoverflow.repository.PublicationRepository;
 import com.stackoverflow.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -22,8 +25,9 @@ public class PublicationServiceImpl implements PublicationService {
     private final TagRepository tagRepository;
 
     @Override
-    public List<Publication> getPublications() {
-        return publicationRepository.findAll();
+    public Page<Publication> getPublications(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return publicationRepository.findAll(pageable);
     }
 
     @Override

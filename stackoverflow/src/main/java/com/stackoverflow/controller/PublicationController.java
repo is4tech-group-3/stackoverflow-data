@@ -4,6 +4,8 @@ import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
 import com.stackoverflow.service.PublicationService;
 import lombok.AllArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +26,8 @@ public class PublicationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Publication>> getPublications() {
-        List<Publication> publications = publicationService.getPublications();
-        return new ResponseEntity<>(publications, HttpStatus.OK);
+    public Page<Publication> getPublications(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return publicationService.getPublications(page, size);
     }
 
     @GetMapping("/{id}")
