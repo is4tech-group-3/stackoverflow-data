@@ -11,6 +11,10 @@ import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -55,18 +59,17 @@ public class PublicationServiceImpl implements PublicationService {
                 .build();
     }
 
-    @Override
-    public List<PublicationResponse> getPublications() {
-        List<Publication> publications = publicationRepository.findAll();
-        return publications.stream().map(publication -> PublicationResponse.builder()
+   @Override
+    public Page<PublicationResponse> getPublications(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Publication> publications = publicationRepository.findAll(pageable);
+        return publications.map(publication -> PublicationResponse.builder()
                 .title(publication.getTitle())
                 .description(publication.getDescription())
                 .dateCreation(publication.getDateCreation())
                 .dateUpdated(publication.getDateUpdated())
-                .author(userRepository.findUserResponseById(publication.getUserId())
-                        .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + publication.getUserId())))
                 .tags(publication.getTags())
-                .build()).collect(Collectors.toList());
+                .build());
     }
 
     @Override

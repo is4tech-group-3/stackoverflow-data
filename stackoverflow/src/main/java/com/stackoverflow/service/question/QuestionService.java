@@ -5,8 +5,10 @@ import com.stackoverflow.dto.question.QuestionRequest;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 public interface QuestionService {
-    List<Question> getAllQuestions();
+    Page<Question> getAllQuestions(int page, int size);
     Question getQuestion(Long idQuestion);
     Question createQuestion(QuestionRequest questionRequest);
     Question updateQuestion(Long idQuestion, QuestionRequest questionRequest);
