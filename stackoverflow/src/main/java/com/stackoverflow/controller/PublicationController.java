@@ -1,7 +1,7 @@
 package com.stackoverflow.controller;
 
-import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
+import com.stackoverflow.dto.publication.PublicationResponse;
 import com.stackoverflow.service.publication.PublicationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,26 +18,26 @@ public class PublicationController {
     private final PublicationService publicationService;
 
     @PostMapping
-    public ResponseEntity<Publication> createPublication(@RequestBody PublicationRequest publicationRequest) {
-        Publication publication = publicationService.createPublication(publicationRequest);
+    public ResponseEntity<PublicationResponse> createPublication(@RequestBody PublicationRequest publicationRequest) {
+        PublicationResponse publication = publicationService.createPublication(publicationRequest);
         return new ResponseEntity<>(publication, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Publication>> getPublications() {
-        List<Publication> publications = publicationService.getPublications();
+    public ResponseEntity<List<PublicationResponse>> getPublications() {
+        List<PublicationResponse> publications = publicationService.getPublications();
         return new ResponseEntity<>(publications, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Publication> getPublicationById(@PathVariable("id") Long id) {
-        Publication publication = publicationService.getPublication(id);
+    public ResponseEntity<PublicationResponse> getPublicationById(@PathVariable("id") Long id) {
+        PublicationResponse publication = publicationService.findPublicationById(id);
         return new ResponseEntity<>(publication, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Publication> updatePublication(@PathVariable("id") Long id, @RequestBody PublicationRequest publicationRequest) {
-        Publication publication = publicationService.updatePublication(id, publicationRequest);
+    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable("id") Long id, @RequestBody PublicationRequest publicationRequest) {
+        PublicationResponse publication = publicationService.updatePublication(id, publicationRequest);
         return new ResponseEntity<>(publication, HttpStatus.OK);
     }
 

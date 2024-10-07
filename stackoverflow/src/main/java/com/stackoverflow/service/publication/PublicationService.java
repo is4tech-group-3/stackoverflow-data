@@ -1,18 +1,19 @@
 package com.stackoverflow.service.publication;
 
-import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
+import com.stackoverflow.dto.publication.PublicationResponse;
 
 import java.util.List;
 
 public interface PublicationService {
-    List<Publication> getPublications();
+    PublicationResponse createPublication(PublicationRequest publicationRequest);
 
-    Publication getPublication(Long idPublication);
+    List<PublicationResponse> getPublications();
 
-    Publication createPublication(PublicationRequest publicationRequest);
+    PublicationResponse findPublicationById(Long idPublication);
 
-    Publication updatePublication(Long idPublication, PublicationRequest publicationRequest);
+
+    PublicationResponse updatePublication(Long idPublication, PublicationRequest publicationRequest);
 
     void deletePublication(Long idPublication);
 }
