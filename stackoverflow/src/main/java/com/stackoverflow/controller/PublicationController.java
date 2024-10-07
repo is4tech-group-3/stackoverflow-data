@@ -2,7 +2,7 @@ package com.stackoverflow.controller;
 
 import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
-import com.stackoverflow.service.PublicationService;
+import com.stackoverflow.service.publication.PublicationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

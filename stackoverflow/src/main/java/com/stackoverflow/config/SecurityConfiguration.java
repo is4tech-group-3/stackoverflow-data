@@ -38,6 +38,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/publication/**").permitAll()
                         .requestMatchers("/api/v1/comment/**").permitAll()
                         .requestMatchers("/api/v1/question/**").permitAll()
+                        .requestMatchers("/api/v1/answer/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

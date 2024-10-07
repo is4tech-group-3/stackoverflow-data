@@ -1,4 +1,4 @@
-package com.stackoverflow.service;
+package com.stackoverflow.service.publication;
 
 import com.stackoverflow.bo.Publication;
 import com.stackoverflow.dto.publication.PublicationRequest;
