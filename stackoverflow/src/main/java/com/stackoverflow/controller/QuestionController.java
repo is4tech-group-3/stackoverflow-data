@@ -5,6 +5,7 @@ import com.stackoverflow.dto.question.QuestionRequest;
 import com.stackoverflow.service.question.QuestionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +25,8 @@ public class QuestionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Question>> getQuestions(HttpServletRequest request) {
-        List<Question> questions = questionService.getAllQuestions();
-        return new ResponseEntity<>(questions, HttpStatus.OK);
+    public Page<Question> getQuestions(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return questionService.getAllQuestions(page, size);
     }
 
     @GetMapping("/{id}")
