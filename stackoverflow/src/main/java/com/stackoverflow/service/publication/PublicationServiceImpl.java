@@ -57,7 +57,7 @@ public class PublicationServiceImpl implements PublicationService {
     public Page<PublicationResponse> getPublications(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Publication> publications = publicationRepository.findAll(pageable);
-        return publications.stream().map(this::createPublicationResponse).collect(Collectors.toList());
+        return publications.map(this::createPublicationResponse);
     }
 
     @Override
