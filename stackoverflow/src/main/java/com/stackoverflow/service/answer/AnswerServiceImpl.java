@@ -10,12 +10,15 @@ import com.stackoverflow.repository.QuestionRepository;
 import com.stackoverflow.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -64,6 +67,14 @@ public class AnswerServiceImpl implements AnswerService {
     public AnswerResponse updateAnswer(Long idAnswer, AnswerRequest answerRequest) {
         Answer answer = answerRepository.findById(idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = ((User) userDetails).getId();
+        List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().map(GrantedAuthority::getAuthority)
+                .toList();
+        if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains("ADMIN")) {
+            throw new AccessDeniedException("You do not have permission to edit this answer");
+        }
         answer.setDescription(answerRequest.getDescription());
         answer.setDateUpdated(LocalDateTime.now());
         answerRepository.save(answer);
@@ -72,6 +83,16 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     public void deleteAnswer(Long idAnswer) {
+        Answer answer = answerRepository.findById(idAnswer)
+                .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = ((User) userDetails).getId();
+        List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().map(GrantedAuthority::getAuthority)
+                .toList();
+        if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains("ADMIN")) {
+            throw new AccessDeniedException("You do not have permission to delete this answer");
+        }
         answerRepository.deleteById(idAnswer);
     }
 
