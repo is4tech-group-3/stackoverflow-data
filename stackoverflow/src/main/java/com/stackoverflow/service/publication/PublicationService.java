@@ -9,7 +9,7 @@ import java.util.List;
 public interface PublicationService {
     PublicationResponse createPublication(PublicationRequest publicationRequest);
 
-    Page<PublicationResponse> getPublications(int page, int size);
+    Page<PublicationResponse> getPublications(int page, int size, String sortby, String sortDirection);
 
     PublicationResponse findPublicationById(Long idPublication);
 

@@ -26,8 +26,13 @@ public class PublicationController {
     }
 
     @GetMapping
-    public Page<PublicationResponse> getPublications(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        return publicationService.getPublications(page, size);
+    public ResponseEntity<Page<PublicationResponse>> getPublications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "dateCreated") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection) {
+        Page<PublicationResponse> publications = publicationService.getPublications(page, size, sortBy, sortDirection);
+        return new ResponseEntity<>(publications, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -37,7 +42,8 @@ public class PublicationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable("id") Long id, @RequestBody PublicationRequest publicationRequest) {
+    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable("id") Long id,
+            @RequestBody PublicationRequest publicationRequest) {
         PublicationResponse publication = publicationService.updatePublication(id, publicationRequest);
         return new ResponseEntity<>(publication, HttpStatus.OK);
     }

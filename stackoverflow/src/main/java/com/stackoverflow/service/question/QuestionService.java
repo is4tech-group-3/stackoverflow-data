@@ -3,12 +3,10 @@ package com.stackoverflow.service.question;
 import com.stackoverflow.bo.Question;
 import com.stackoverflow.dto.question.QuestionRequest;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 
 public interface QuestionService {
-    Page<Question> getAllQuestions(int page, int size);
+    Page<Question> getAllQuestions(int page, int size, String sortBy, String sortDirection);
     Question getQuestion(Long idQuestion);
     Question createQuestion(QuestionRequest questionRequest);
     Question updateQuestion(Long idQuestion, QuestionRequest questionRequest);

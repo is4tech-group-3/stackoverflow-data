@@ -28,9 +28,8 @@ public class Comment {
     @Column(name = "date_update")
     private LocalDateTime dateUpdate;
 
-    @ManyToOne
-    @JoinColumn(name = "publication_id", nullable = false)
-    private Publication publication;
+    @Column(name = "publication_id")
+    private Long idPublication;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

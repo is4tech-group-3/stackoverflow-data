@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/question")
 public class QuestionController {
@@ -19,14 +17,19 @@ public class QuestionController {
     private QuestionService questionService;
 
     @PostMapping
-    public ResponseEntity<Question> createQuestion(@RequestBody QuestionRequest questionRequest, HttpServletRequest request) {
+    public ResponseEntity<Question> createQuestion(@RequestBody QuestionRequest questionRequest,
+            HttpServletRequest request) {
         Question question = questionService.createQuestion(questionRequest);
         return new ResponseEntity<>(question, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public Page<Question> getQuestions(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        return questionService.getAllQuestions(page, size);
+    public Page<Question> getQuestions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "dateCreation") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection) {
+        return questionService.getAllQuestions(page, size, sortBy, sortDirection);
     }
 
     @GetMapping("/{id}")
@@ -36,7 +39,8 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Question> updateQuestion(@PathVariable(name = "id") Long id, @RequestBody QuestionRequest questionRequest, HttpServletRequest request) {
+    public ResponseEntity<Question> updateQuestion(@PathVariable(name = "id") Long id,
+            @RequestBody QuestionRequest questionRequest, HttpServletRequest request) {
         Question question = questionService.updateQuestion(id, questionRequest);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
