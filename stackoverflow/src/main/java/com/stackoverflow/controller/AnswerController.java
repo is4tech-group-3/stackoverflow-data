@@ -31,9 +31,11 @@ public class AnswerController {
     public ResponseEntity<Page<AnswerResponse>> getAllAnswers(
             @PathVariable("idQuestion") Long idQuestion,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "dateCreated") String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "desc") String sortDirection) {
 
-        Page<AnswerResponse> answers = answerService.getAnswersByQuestionId(idQuestion, page, size);
+        Page<AnswerResponse> answers = answerService.getAnswersByQuestionId(idQuestion, page, size, sortBy, sortDirection);
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 

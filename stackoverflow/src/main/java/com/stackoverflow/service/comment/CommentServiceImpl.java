@@ -1,9 +1,12 @@
 package com.stackoverflow.service.comment;
 
+import com.stackoverflow.bo.Answer;
 import com.stackoverflow.bo.Comment;
 import com.stackoverflow.bo.Publication;
 import com.stackoverflow.bo.User;
 import com.stackoverflow.dto.comment.CommentRequest;
+import com.stackoverflow.dto.comment.CommentResponse;
+import com.stackoverflow.dto.user.UserResponse;
 import com.stackoverflow.repository.CommentRepository;
 import com.stackoverflow.repository.PublicationRepository;
 import com.stackoverflow.repository.UserRepository;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -35,49 +39,55 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     @Override
-    public Page<Comment> getComments(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return commentRepository.findAll(pageable);
-    }
-
-    @Override
-    public Comment getComment(Long idComment) {
-        return commentRepository.findById(idComment)
-                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-    }
-
-    @Override
-    public Comment createComment(Long idPublication, CommentRequest commentRequest) {
+    public CommentResponse createComment(Long idPublication, CommentRequest commentRequest) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        Publication publication = publicationRepository.findById(idPublication)
+        publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException("Publication not found"));
 
         Comment comment = Comment.builder()
                 .description(commentRequest.getDescription())
                 .dateCreation(LocalDateTime.now())
                 .dateUpdate(LocalDateTime.now())
-                .publication(publication)
+                .idPublication(idPublication)
                 .user(user)
                 .build();
-        return commentRepository.save(comment);
+        commentRepository.save(comment);
+        return createCommentResponse(comment);
     }
 
     @Override
-    public Comment updateComment(Long idComment, CommentRequest commentRequest) {
-        Optional<Comment> commentFound = commentRepository.findById(idComment);
-        if (commentFound.isEmpty()) {
-            throw new EntityNotFoundException("Commento not found");
-        }
+    public Page<CommentResponse> getCommentsByPublicationId(Long idPublication, int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
-        Comment comment = commentFound.get();
-        comment.setDescription(commentRequest.getDescription());
-        comment.setDateUpdate(LocalDateTime.now());
-        return commentRepository.save(comment);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Comment> commentPage = commentRepository.findByIdPublication(idPublication, pageable);
+
+        return commentPage.map(this::createCommentResponse);
+    }
+
+    @Override
+    public CommentResponse findCommentById(Long idComment) {
+        Comment comment = commentRepository.findById(idComment)
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                                "Comment not found with id: " + idComment));
+                return createCommentResponse(comment);
+    }
+
+    @Override
+    public CommentResponse updateComment(Long idComment, CommentRequest commentRequest) {
+        Comment comment = commentRepository.findById(idComment)
+            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+
+            comment.setDescription(commentRequest.getDescription());
+            comment.setDateUpdate(LocalDateTime.now());
+            commentRepository.save(comment);
+            return createCommentResponse(comment);
     }
 
     @Override
@@ -85,5 +95,18 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.findById(idComment)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
         commentRepository.deleteById(idComment);
+    }
+
+    public CommentResponse createCommentResponse(Comment comment) {
+        return CommentResponse.builder()
+                .idComment(comment.getId())
+                .description(comment.getDescription())
+                .dateCreated(comment.getDateCreation())
+                .dateUpdated(comment.getDateUpdate())
+                .idPublication(comment.getIdPublication())
+                .author(
+                        new UserResponse(comment.getUser().getId(), comment.getUser().getName(),
+                                comment.getUser().getSurname(), comment.getUser().getUsername()))
+                .build();
     }
 }

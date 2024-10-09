@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,9 +56,10 @@ public class PublicationServiceImpl implements PublicationService {
     }
 
 
-    @Override
-    public Page<PublicationResponse> getPublications(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+   @Override
+    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending(); 
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Publication> publications = publicationRepository.findAll(pageable);
         return publications.map(this::createPublicationResponse);
     }
