@@ -5,10 +5,12 @@ import com.stackoverflow.dto.answer.AnswerResponse;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 public interface AnswerService {
     AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest);
 
-    List<AnswerResponse> getAnswersByQuestionId(Long idQuestion);
+    Page<AnswerResponse> getAnswersByQuestionId(Long idQuestion, int page, int size);
 
     AnswerResponse findAnswerById(Long idAnswer);
 
