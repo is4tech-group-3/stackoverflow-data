@@ -8,6 +8,8 @@ import com.stackoverflow.dto.publication.PublicationResponse;
 import com.stackoverflow.repository.PublicationRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
+import com.stackoverflow.util.ValidationUtil;
+
 import com.stackoverflow.util.LoggerService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -38,6 +40,12 @@ public class PublicationServiceImpl implements PublicationService {
 
     @Override
     public PublicationResponse createPublication(PublicationRequest publicationRequest) {
+        ValidationUtil.validateNotEmpty(publicationRequest.getTitle(), "Title");
+        ValidationUtil.validateMaxLength(publicationRequest.getTitle(), 50, "Title");
+
+        ValidationUtil.validateNotEmpty(publicationRequest.getDescription(), "Description");
+        ValidationUtil.validateMaxLength(publicationRequest.getDescription(), 256, "Description");
+
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(publicationRequest.getIdTags()));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
@@ -55,9 +63,8 @@ public class PublicationServiceImpl implements PublicationService {
         return createPublicationResponse(publication);
     }
 
-
-   @Override
-    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection) {
+    @Override
+    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection)
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending(); 
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Publication> publications = publicationRepository.findAll(pageable);
@@ -75,6 +82,13 @@ public class PublicationServiceImpl implements PublicationService {
     public PublicationResponse updatePublication(Long idPublication, PublicationRequest publicationRequest) {
         Publication publication = publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
+
+        ValidationUtil.validateNotEmpty(publicationRequest.getTitle(), "Title");
+        ValidationUtil.validateMaxLength(publicationRequest.getTitle(), 50, "Title");
+
+        ValidationUtil.validateNotEmpty(publicationRequest.getDescription(), "Description");
+        ValidationUtil.validateMaxLength(publicationRequest.getDescription(), 256, "Description");
+
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
@@ -116,8 +130,8 @@ public class PublicationServiceImpl implements PublicationService {
                 .dateUpdated(publication.getDateUpdated())
                 .author(
                         userRepository.findUserResponseById(publication.getUserId())
-                                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + publication.getUserId()))
-                )
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                        "User not found with id: " + publication.getUserId())))
                 .tags(publication.getTags())
                 .build();
     }

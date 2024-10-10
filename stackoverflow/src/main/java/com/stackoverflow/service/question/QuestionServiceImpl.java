@@ -7,6 +7,8 @@ import com.stackoverflow.dto.question.QuestionRequest;
 import com.stackoverflow.repository.QuestionRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
+import com.stackoverflow.util.ValidationUtil;
+
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -52,6 +54,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Question createQuestion(QuestionRequest questionRequest) {
+        ValidationUtil.validateNotEmpty(questionRequest.getTitle(), "Title");
+        ValidationUtil.validateMaxLength(questionRequest.getTitle(), 50, "Title");
+
+        ValidationUtil.validateNotEmpty(questionRequest.getDescription(), "Description");
+        ValidationUtil.validateMaxLength(questionRequest.getDescription(), 255, "Description");
+
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(questionRequest.getIdTags()));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -75,6 +83,13 @@ public class QuestionServiceImpl implements QuestionService {
     public Question updateQuestion(Long idQuestion, QuestionRequest questionRequest) {
         Question question = questionRepository.findById(idQuestion)
                 .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+
+        ValidationUtil.validateNotEmpty(questionRequest.getTitle(), "Title");
+        ValidationUtil.validateMaxLength(questionRequest.getTitle(), 50, "Title");
+
+        ValidationUtil.validateNotEmpty(questionRequest.getDescription(), "Description");
+        ValidationUtil.validateMaxLength(questionRequest.getDescription(), 255, "Description");
+
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(questionRequest.getIdTags()));
         question.setTitle(questionRequest.getTitle());
         question.setDescription(questionRequest.getDescription());

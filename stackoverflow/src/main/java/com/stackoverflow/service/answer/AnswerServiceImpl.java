@@ -8,6 +8,8 @@ import com.stackoverflow.dto.user.UserResponse;
 import com.stackoverflow.repository.AnswerRepository;
 import com.stackoverflow.repository.QuestionRepository;
 import com.stackoverflow.repository.UserRepository;
+import com.stackoverflow.util.ValidationUtil;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +37,9 @@ public class AnswerServiceImpl implements AnswerService {
 
         @Override
         public AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest) {
+                ValidationUtil.validateNotEmpty(answerRequest.getDescription(), "Description");
+                ValidationUtil.validateMaxLength(answerRequest.getDescription(), 255, "Description");
+
                 UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                                 .getPrincipal();
                 Long userId = ((User) userDetails).getId();
@@ -76,6 +81,8 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     public AnswerResponse updateAnswer(Long idAnswer, AnswerRequest answerRequest) {
+        ValidationUtil.validateNotEmpty(answerRequest.getDescription(), "Description");
+        ValidationUtil.validateMaxLength(answerRequest.getDescription(), 255, "Description");
         Answer answer = answerRepository.findById(idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
