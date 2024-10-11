@@ -3,26 +3,30 @@ package com.stackoverflow.controller;
 import com.stackoverflow.bo.Question;
 import com.stackoverflow.dto.question.QuestionRequest;
 import com.stackoverflow.service.question.QuestionService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.stackoverflow.util.AuditAnnotation;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/question")
 public class QuestionController {
-    @Autowired
-    private QuestionService questionService;
 
+    private final QuestionService questionService;
+
+    private final String ENTITY_NAME = "QUESTION";
+
+    @AuditAnnotation(ENTITY_NAME)
     @PostMapping
-    public ResponseEntity<Question> createQuestion(@RequestBody QuestionRequest questionRequest,
-            HttpServletRequest request) {
+    public ResponseEntity<Question> createQuestion(@RequestBody QuestionRequest questionRequest) {
         Question question = questionService.createQuestion(questionRequest);
         return new ResponseEntity<>(question, HttpStatus.CREATED);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @GetMapping
     public Page<Question> getQuestions(
             @RequestParam(defaultValue = "0") int page,
@@ -32,22 +36,25 @@ public class QuestionController {
         return questionService.getAllQuestions(page, size, sortBy, sortDirection);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{id}")
-    public ResponseEntity<Question> getQuestion(@PathVariable(name = "id") Long id, HttpServletRequest request) {
+    public ResponseEntity<Question> getQuestion(@PathVariable(name = "id") Long id) {
         Question question = questionService.getQuestion(id);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @PutMapping("/{id}")
     public ResponseEntity<Question> updateQuestion(@PathVariable(name = "id") Long id,
-            @RequestBody QuestionRequest questionRequest, HttpServletRequest request) {
+            @RequestBody QuestionRequest questionRequest) {
         Question question = questionService.updateQuestion(id, questionRequest);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuestion(@PathVariable(name = "id") Long id, HttpServletRequest request) {
+    public ResponseEntity<String> deleteQuestion(@PathVariable(name = "id") Long id) {
         questionService.deleteQuestion(id);
-        return new ResponseEntity<>("Question deleted successfully", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>("Question deleted successfully", HttpStatus.OK);
     }
 }
