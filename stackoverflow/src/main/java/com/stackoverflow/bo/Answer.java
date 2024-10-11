@@ -1,6 +1,9 @@
 package com.stackoverflow.bo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +23,9 @@ public class Answer {
     @Column(name = "answer_id")
     private Long idAnswer;
 
+    @Size(max = 255, message = "The description must not be longer than 255 characters")
+    @NotNull(message = "The description field cannot be null")
+    @NotBlank(message = "Description is required")
     private String description;
 
     @Column(name = "date_creation")
