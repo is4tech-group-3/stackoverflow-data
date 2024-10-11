@@ -11,7 +11,12 @@ import com.stackoverflow.repository.UserRepository;
 import com.stackoverflow.util.ValidationUtil;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -34,12 +40,10 @@ public class AnswerServiceImpl implements AnswerService {
         private final AnswerRepository answerRepository;
         private final UserRepository userRepository;
         private final QuestionRepository questionRepository;
+        private final Validator validator;
 
         @Override
         public AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest) {
-                ValidationUtil.validateNotEmpty(answerRequest.getDescription(), "Description");
-                ValidationUtil.validateMaxLength(answerRequest.getDescription(), 255, "Description");
-
                 UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                                 .getPrincipal();
                 Long userId = ((User) userDetails).getId();
@@ -81,21 +85,28 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     public AnswerResponse updateAnswer(Long idAnswer, AnswerRequest answerRequest) {
-        ValidationUtil.validateNotEmpty(answerRequest.getDescription(), "Description");
-        ValidationUtil.validateMaxLength(answerRequest.getDescription(), 255, "Description");
         Answer answer = answerRepository.findById(idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
+
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
+
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
+
         if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains("ADMIN")) {
             throw new AccessDeniedException("You do not have permission to edit this answer");
         }
+
         answer.setDescription(answerRequest.getDescription());
         answer.setDateUpdated(LocalDateTime.now());
+
+        Set<ConstraintViolation<Answer>> violations = validator.validate(answer);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+
         answerRepository.save(answer);
+
         return createAnswerResponse(answer);
     }
 
@@ -103,14 +114,18 @@ public class AnswerServiceImpl implements AnswerService {
     public void deleteAnswer(Long idAnswer) {
         Answer answer = answerRepository.findById(idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
+
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
+
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
+
         if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains("ADMIN")) {
             throw new AccessDeniedException("You do not have permission to delete this answer");
         }
+
         answerRepository.deleteById(idAnswer);
     }
 
@@ -124,11 +139,11 @@ public class AnswerServiceImpl implements AnswerService {
                                 .verified(answer.getVerified())
                                 .idQuestion(answer.getIdQuestion())
                                 .author(
-                                                new UserResponse(
-                                                                answer.getUser().getId(),
-                                                                answer.getUser().getName(),
-                                                                answer.getUser().getSurname(),
-                                                                answer.getUser().getUsername()))
+                                        new UserResponse(
+                                                answer.getUser().getId(),
+                                                answer.getUser().getName(),
+                                                answer.getUser().getSurname(),
+                                                answer.getUser().getUsername()))
                                 .build();
         }
 }

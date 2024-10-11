@@ -10,7 +10,13 @@ import com.stackoverflow.repository.UserRepository;
 import com.stackoverflow.util.ValidationUtil;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@AllArgsConstructor
 @Service
 public class QuestionServiceImpl implements QuestionService {
 
@@ -36,6 +43,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
     private TagRepository tagRepository;
+
+    private final Validator validator;
 
     @Override
     public Page<Question> getAllQuestions(int page, int size, String sortBy, String sortDirection) {
@@ -84,17 +93,15 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepository.findById(idQuestion)
                 .orElseThrow(() -> new EntityNotFoundException("Question not found"));
 
-        ValidationUtil.validateNotEmpty(questionRequest.getTitle(), "Title");
-        ValidationUtil.validateMaxLength(questionRequest.getTitle(), 50, "Title");
-
-        ValidationUtil.validateNotEmpty(questionRequest.getDescription(), "Description");
-        ValidationUtil.validateMaxLength(questionRequest.getDescription(), 255, "Description");
-
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(questionRequest.getIdTags()));
         question.setTitle(questionRequest.getTitle());
         question.setDescription(questionRequest.getDescription());
         question.setTags(tags);
         question.setDateUpdate(LocalDateTime.now());
+
+        Set<ConstraintViolation<Question>> violations = validator.validate(question);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+
         return questionRepository.save(question);
     }
 

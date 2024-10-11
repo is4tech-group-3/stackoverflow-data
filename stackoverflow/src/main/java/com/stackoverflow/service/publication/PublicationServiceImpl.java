@@ -12,8 +12,12 @@ import com.stackoverflow.util.ValidationUtil;
 
 import com.stackoverflow.util.LoggerService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,20 +41,18 @@ public class PublicationServiceImpl implements PublicationService {
     private final PublicationRepository publicationRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final Validator validator;
 
     @Override
     public PublicationResponse createPublication(PublicationRequest publicationRequest) {
-        ValidationUtil.validateNotEmpty(publicationRequest.getTitle(), "Title");
-        ValidationUtil.validateMaxLength(publicationRequest.getTitle(), 50, "Title");
-
-        ValidationUtil.validateNotEmpty(publicationRequest.getDescription(), "Description");
-        ValidationUtil.validateMaxLength(publicationRequest.getDescription(), 256, "Description");
-
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(publicationRequest.getIdTags()));
+
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
+
         userRepository.findUserResponseById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
         Publication publication = Publication.builder()
                 .title(publicationRequest.getTitle())
                 .description(publicationRequest.getDescription())
@@ -59,12 +61,14 @@ public class PublicationServiceImpl implements PublicationService {
                 .userId(userId)
                 .tags(tags)
                 .build();
+
         publicationRepository.save(publication);
+
         return createPublicationResponse(publication);
     }
 
     @Override
-    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection)
+    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection){
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending(); 
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Publication> publications = publicationRepository.findAll(pageable);
@@ -83,26 +87,28 @@ public class PublicationServiceImpl implements PublicationService {
         Publication publication = publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
 
-        ValidationUtil.validateNotEmpty(publicationRequest.getTitle(), "Title");
-        ValidationUtil.validateMaxLength(publicationRequest.getTitle(), 50, "Title");
-
-        ValidationUtil.validateNotEmpty(publicationRequest.getDescription(), "Description");
-        ValidationUtil.validateMaxLength(publicationRequest.getDescription(), 256, "Description");
-
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
+
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
+
         if (!Objects.equals(publication.getUserId(), userId) && !roles.contains("ADMIN")) {
             throw new AccessDeniedException("You do not have permission to edit this publication");
         }
+
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(publicationRequest.getIdTags()));
         publication.setTitle(publicationRequest.getTitle());
         publication.setDescription(publicationRequest.getDescription());
         publication.setTags(tags);
         publication.setDateUpdated(LocalDateTime.now());
+
+        Set<ConstraintViolation<Publication>> violations = validator.validate(publication);
+        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+
         publicationRepository.save(publication);
+
         return createPublicationResponse(publication);
     }
 

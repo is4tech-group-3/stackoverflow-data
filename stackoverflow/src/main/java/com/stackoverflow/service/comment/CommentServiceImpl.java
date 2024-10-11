@@ -11,9 +11,13 @@ import com.stackoverflow.repository.UserRepository;
 import com.stackoverflow.util.ValidationUtil;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @AllArgsConstructor
 @Service
@@ -35,15 +40,12 @@ public class CommentServiceImpl implements CommentService {
         private PublicationRepository publicationRepository;
 
         private final CommentRepository commentRepository;
+        private final Validator validator;
 
         @Override
         public CommentResponse createComment(Long idPublication, CommentRequest commentRequest) {
-                UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-                                .getPrincipal();
+                UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 Long userId = ((User) userDetails).getId();
-
-                ValidationUtil.validateNotEmpty(commentRequest.getDescription(), "Description");
-                ValidationUtil.validateMaxLength(commentRequest.getDescription(), 255, "Description");
 
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -52,21 +54,21 @@ public class CommentServiceImpl implements CommentService {
                                 .orElseThrow(() -> new EntityNotFoundException("Publication not found"));
 
                 Comment comment = Comment.builder()
-                                .description(commentRequest.getDescription())
-                                .dateCreation(LocalDateTime.now())
-                                .dateUpdate(LocalDateTime.now())
-                                .idPublication(idPublication)
-                                .user(user)
-                                .build();
+                        .description(commentRequest.getDescription())
+                        .dateCreation(LocalDateTime.now())
+                        .dateUpdate(LocalDateTime.now())
+                        .idPublication(idPublication)
+                        .user(user)
+                        .build();
                 commentRepository.save(comment);
+
                 return createCommentResponse(comment);
         }
 
         @Override
-        public Page<CommentResponse> getCommentsByPublicationId(Long idPublication, int page, int size, String sortBy,
-                        String sortDirection) {
+        public Page<CommentResponse> getCommentsByPublicationId(Long idPublication, int page, int size, String sortBy, String sortDirection) {
                 Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-                                : Sort.by(sortBy).descending();
+                        : Sort.by(sortBy).descending();
 
                 Pageable pageable = PageRequest.of(page, size, sort);
                 Page<Comment> commentPage = commentRepository.findByIdPublication(idPublication, pageable);
@@ -87,12 +89,14 @@ public class CommentServiceImpl implements CommentService {
                 Comment comment = commentRepository.findById(idComment)
                                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 
-                ValidationUtil.validateNotEmpty(commentRequest.getDescription(), "Description");
-                ValidationUtil.validateMaxLength(commentRequest.getDescription(), 255, "Description");
-
                 comment.setDescription(commentRequest.getDescription());
                 comment.setDateUpdate(LocalDateTime.now());
+
+                Set<ConstraintViolation<Comment>> violations = validator.validate(comment);
+                if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+
                 commentRepository.save(comment);
+
                 return createCommentResponse(comment);
         }
 
@@ -111,9 +115,9 @@ public class CommentServiceImpl implements CommentService {
                                 .dateUpdated(comment.getDateUpdate())
                                 .idPublication(comment.getIdPublication())
                                 .author(
-                                                new UserResponse(comment.getUser().getId(), comment.getUser().getName(),
-                                                                comment.getUser().getSurname(),
-                                                                comment.getUser().getUsername()))
+                                        new UserResponse(comment.getUser().getId(), comment.getUser().getName(),
+                                                comment.getUser().getSurname(),
+                                                comment.getUser().getUsername()))
                                 .build();
         }
 }
