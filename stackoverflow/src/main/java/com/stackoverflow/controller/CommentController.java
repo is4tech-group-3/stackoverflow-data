@@ -4,6 +4,7 @@ import com.stackoverflow.bo.Comment;
 import com.stackoverflow.dto.comment.CommentRequest;
 import com.stackoverflow.dto.comment.CommentResponse;
 import com.stackoverflow.service.comment.CommentService;
+import com.stackoverflow.util.AuditAnnotation;
 import lombok.AllArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -20,6 +21,9 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    private final String ENTITY_NAME = "COMMENT";
+
+    @AuditAnnotation(ENTITY_NAME)
     @PostMapping("/{idPublication}")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable("idPublication") Long idPublication,
@@ -28,6 +32,7 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{idPublication}")
     public ResponseEntity<Page<CommentResponse>> getComments(
             @PathVariable("idPublication") Long idPublication,
@@ -41,12 +46,14 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/findById/{id}")
     public ResponseEntity<CommentResponse> getComment(@PathVariable("id") Long idComment) {
         CommentResponse comment = commentService.findCommentById(idComment);
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @PutMapping("/{id}")
     public ResponseEntity<CommentResponse> updateComment(@PathVariable("id") Long id,
             @RequestBody CommentRequest commentRequest) {
@@ -54,9 +61,10 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteComment(@PathVariable("id") Long id) {
         commentService.deleteComment(id);
-        return new ResponseEntity<>("Comment deleted successfully", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
     }
 }

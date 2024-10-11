@@ -3,15 +3,13 @@ package com.stackoverflow.controller;
 import com.stackoverflow.dto.answer.AnswerRequest;
 import com.stackoverflow.dto.answer.AnswerResponse;
 import com.stackoverflow.service.answer.AnswerService;
-import com.stackoverflow.util.LoggerService;
+import com.stackoverflow.util.AuditAnnotation;
 import lombok.AllArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -20,6 +18,9 @@ public class AnswerController {
 
     private final AnswerService answerService;
 
+    private final String ENTITY_NAME = "ANSWER";
+
+    @AuditAnnotation(ENTITY_NAME)
     @PostMapping("/{idQuestion}")
     public ResponseEntity<AnswerResponse> createAnswer(@PathVariable("idQuestion") Long idQuestion,
             @RequestBody AnswerRequest answerRequest) {
@@ -27,6 +28,7 @@ public class AnswerController {
         return new ResponseEntity<>(answer, HttpStatus.CREATED);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{idQuestion}")
     public ResponseEntity<Page<AnswerResponse>> getAllAnswers(
             @PathVariable("idQuestion") Long idQuestion,
@@ -39,12 +41,14 @@ public class AnswerController {
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/findById/{id}")
     public ResponseEntity<AnswerResponse> findAnswerById(@PathVariable("id") Long idAnswer) {
         AnswerResponse answer = answerService.findAnswerById(idAnswer);
         return new ResponseEntity<>(answer, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @PutMapping("/{id}")
     public ResponseEntity<AnswerResponse> updateAnswer(@PathVariable("id") Long idAnswer,
             @RequestBody AnswerRequest answerRequest) {
@@ -52,6 +56,7 @@ public class AnswerController {
         return new ResponseEntity<>(answer, HttpStatus.OK);
     }
 
+    @AuditAnnotation(ENTITY_NAME)
     @DeleteMapping("{id}")
     public ResponseEntity<String> deleteAnswer(@PathVariable("id") Long idAnswer) {
         answerService.deleteAnswer(idAnswer);
