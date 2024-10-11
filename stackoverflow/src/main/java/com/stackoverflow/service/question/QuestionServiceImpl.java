@@ -7,7 +7,6 @@ import com.stackoverflow.dto.question.QuestionRequest;
 import com.stackoverflow.repository.QuestionRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
-import com.stackoverflow.util.ValidationUtil;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -15,35 +14,26 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
 @Service
 public class QuestionServiceImpl implements QuestionService {
 
-    @Autowired
     private QuestionRepository questionRepository;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private TagRepository tagRepository;
-
     private final Validator validator;
 
     @Override
@@ -63,12 +53,6 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Question createQuestion(QuestionRequest questionRequest) {
-        ValidationUtil.validateNotEmpty(questionRequest.getTitle(), "Title");
-        ValidationUtil.validateMaxLength(questionRequest.getTitle(), 50, "Title");
-
-        ValidationUtil.validateNotEmpty(questionRequest.getDescription(), "Description");
-        ValidationUtil.validateMaxLength(questionRequest.getDescription(), 255, "Description");
-
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(questionRequest.getIdTags()));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

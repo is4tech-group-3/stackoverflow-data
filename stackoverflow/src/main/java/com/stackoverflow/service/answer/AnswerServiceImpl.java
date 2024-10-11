@@ -8,7 +8,6 @@ import com.stackoverflow.dto.user.UserResponse;
 import com.stackoverflow.repository.AnswerRepository;
 import com.stackoverflow.repository.QuestionRepository;
 import com.stackoverflow.repository.UserRepository;
-import com.stackoverflow.util.ValidationUtil;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -16,7 +15,6 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service

@@ -8,16 +8,13 @@ import com.stackoverflow.dto.publication.PublicationResponse;
 import com.stackoverflow.repository.PublicationRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
-import com.stackoverflow.util.ValidationUtil;
 
-import com.stackoverflow.util.LoggerService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
