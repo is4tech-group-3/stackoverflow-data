@@ -34,8 +34,6 @@ public class Answer {
     @Column(name = "date_update")
     private LocalDateTime dateUpdated;
 
-    private Integer likes;
-
     private Boolean verified;
 
     @Column(name = "question_id")

@@ -34,51 +34,50 @@ import java.util.Set;
 @Service
 public class AnswerServiceImpl implements AnswerService {
 
-        private final AnswerRepository answerRepository;
-        private final UserRepository userRepository;
-        private final QuestionRepository questionRepository;
-        private final Validator validator;
+    private final AnswerRepository answerRepository;
+    private final UserRepository userRepository;
+    private final QuestionRepository questionRepository;
+    private final Validator validator;
 
-        @Override
-        public AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest) {
-                UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-                                .getPrincipal();
-                Long userId = ((User) userDetails).getId();
-                User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-                questionRepository.findById(idQuestion)
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                                "Question not found with id: " + idQuestion));
-                Answer answer = Answer.builder()
-                                .description(answerRequest.getDescription())
-                                .dateCreated(LocalDateTime.now())
-                                .dateUpdated(LocalDateTime.now())
-                                .likes(0)
-                                .verified(false)
-                                .idQuestion(idQuestion)
-                                .user(user)
-                                .build();
-                answerRepository.save(answer);
-                return createAnswerResponse(answer);
-        }
+    @Override
+    public AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Long userId = ((User) userDetails).getId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        questionRepository.findById(idQuestion)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Question not found with id: " + idQuestion));
+        Answer answer = Answer.builder()
+                .description(answerRequest.getDescription())
+                .dateCreated(LocalDateTime.now())
+                .dateUpdated(LocalDateTime.now())
+                .verified(false)
+                .idQuestion(idQuestion)
+                .user(user)
+                .build();
+        answerRepository.save(answer);
+        return createAnswerResponse(answer);
+    }
 
-        @Override
-        public Page<AnswerResponse> getAnswersByQuestionId(Long idQuestion, int page, int size, String sortBy, String sortDirection) {
-                Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+    @Override
+    public Page<AnswerResponse> getAnswersByQuestionId(Long idQuestion, int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
-                Pageable pageable = PageRequest.of(page, size, sort);
-                Page<Answer> answerPage = answerRepository.findByIdQuestion(idQuestion, pageable);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Answer> answerPage = answerRepository.findByIdQuestion(idQuestion, pageable);
 
-                return answerPage.map(this::createAnswerResponse);
-        }
+        return answerPage.map(this::createAnswerResponse);
+    }
 
-        @Override
-        public AnswerResponse findAnswerById(Long idAnswer) {
-                Answer answer = answerRepository.findById(idAnswer)
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                                "Answer not found with id: " + idAnswer));
-                return createAnswerResponse(answer);
-        }
+    @Override
+    public AnswerResponse findAnswerById(Long idAnswer) {
+        Answer answer = answerRepository.findById(idAnswer)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Answer not found with id: " + idAnswer));
+        return createAnswerResponse(answer);
+    }
 
     @Override
     public AnswerResponse updateAnswer(Long idAnswer, AnswerRequest answerRequest) {
@@ -126,21 +125,20 @@ public class AnswerServiceImpl implements AnswerService {
         answerRepository.deleteById(idAnswer);
     }
 
-        public AnswerResponse createAnswerResponse(Answer answer) {
-                return AnswerResponse.builder()
-                                .idAnswer(answer.getIdAnswer())
-                                .description(answer.getDescription())
-                                .dateCreated(answer.getDateCreated())
-                                .dateUpdated(answer.getDateUpdated())
-                                .likes(answer.getLikes())
-                                .verified(answer.getVerified())
-                                .idQuestion(answer.getIdQuestion())
-                                .author(
-                                        new UserResponse(
-                                                answer.getUser().getId(),
-                                                answer.getUser().getName(),
-                                                answer.getUser().getSurname(),
-                                                answer.getUser().getUsername()))
-                                .build();
-        }
+    public AnswerResponse createAnswerResponse(Answer answer) {
+        return AnswerResponse.builder()
+                .idAnswer(answer.getIdAnswer())
+                .description(answer.getDescription())
+                .dateCreated(answer.getDateCreated())
+                .dateUpdated(answer.getDateUpdated())
+                .verified(answer.getVerified())
+                .idQuestion(answer.getIdQuestion())
+                .author(
+                        new UserResponse(
+                                answer.getUser().getId(),
+                                answer.getUser().getName(),
+                                answer.getUser().getSurname(),
+                                answer.getUser().getUsername()))
+                .build();
+    }
 }
