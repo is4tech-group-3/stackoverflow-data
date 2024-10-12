@@ -16,7 +16,6 @@ public class AnswerResponse {
     private LocalDateTime dateCreated;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime dateUpdated;
-    private Integer likes;
     private Boolean verified;
     private Long idQuestion;
     private UserResponse author;

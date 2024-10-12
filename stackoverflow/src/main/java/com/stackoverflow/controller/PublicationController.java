@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/publication")
@@ -34,7 +32,7 @@ public class PublicationController {
     public ResponseEntity<Page<PublicationResponse>> getPublications(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "dateCreated") String sortBy,
+            @RequestParam(defaultValue = "dateCreation") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDirection) {
         Page<PublicationResponse> publications = publicationService.getPublications(page, size, sortBy, sortDirection);
         return new ResponseEntity<>(publications, HttpStatus.OK);
