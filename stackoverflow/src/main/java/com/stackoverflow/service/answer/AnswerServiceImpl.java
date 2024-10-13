@@ -1,6 +1,7 @@
 package com.stackoverflow.service.answer;
 
 import com.stackoverflow.bo.Answer;
+import com.stackoverflow.bo.Question;
 import com.stackoverflow.bo.User;
 import com.stackoverflow.dto.answer.AnswerRequest;
 import com.stackoverflow.dto.answer.AnswerResponse;
@@ -15,6 +16,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -123,6 +125,47 @@ public class AnswerServiceImpl implements AnswerService {
         }
 
         answerRepository.deleteById(idAnswer);
+    }
+
+    @Override
+    public void verifiedAnswer(Long idQuestion, Long idAnswer) {
+        answerRepository.findByIdQuestionAndVerifiedTrue(idQuestion)
+                .ifPresent(answer -> {
+                    throw new DataIntegrityViolationException("This question already has a verified answer");
+                });
+        Answer answer = answerRepository.findByIdAnswerAndIdQuestion(idAnswer, idQuestion)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No answer was found with id " + idAnswer + " pertaining to the question with id " + idQuestion));
+        Question question = questionRepository.findById(answer.getIdQuestion())
+                .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + answer.getIdQuestion()));
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = ((User) userDetails).getId();
+        if (!Objects.equals(question.getUser().getId(), userId))
+            throw new AccessDeniedException("Do not have permission to verify this answer");
+
+        answer.setVerified(true);
+        answerRepository.save(answer);
+    }
+
+    @Override
+    public void removeVerifiedAnswer(Long idQuestion, Long idAnswer) {
+        Answer answer = answerRepository.findByIdQuestionAndIdAnswerAndVerifiedTrue(idQuestion, idAnswer)
+                .orElseThrow(() -> new EntityNotFoundException("the response with the id " + idAnswer + " is not verified"));
+        Question question = questionRepository.findById(answer.getIdQuestion())
+                        .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + answer.getIdQuestion()));
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = ((User) userDetails).getId();
+        if (!Objects.equals(question.getUser().getId(), userId))
+            throw new AccessDeniedException("Do not have permission to remove verification from this answer");
+        answer.setVerified(false);
+        answerRepository.save(answer);
+    }
+
+    @Override
+    public AnswerResponse getAnswerVerifiedByQuestionId(Long idQuestion) {
+        Answer answer = answerRepository.findByIdQuestionAndVerifiedTrue(idQuestion)
+                .orElseThrow(() -> new EntityNotFoundException("The verified answer to the question with id " + idQuestion + " was not found"));
+        return createAnswerResponse(answer);
     }
 
     public AnswerResponse createAnswerResponse(Answer answer) {
