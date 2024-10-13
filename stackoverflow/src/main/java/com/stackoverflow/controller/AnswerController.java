@@ -23,7 +23,7 @@ public class AnswerController {
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping("/{idQuestion}")
     public ResponseEntity<AnswerResponse> createAnswer(@PathVariable("idQuestion") Long idQuestion,
-            @RequestBody AnswerRequest answerRequest) {
+                                                       @RequestBody AnswerRequest answerRequest) {
         AnswerResponse answer = answerService.createAnswer(idQuestion, answerRequest);
         return new ResponseEntity<>(answer, HttpStatus.CREATED);
     }
@@ -51,7 +51,7 @@ public class AnswerController {
     @AuditAnnotation(ENTITY_NAME)
     @PutMapping("/{id}")
     public ResponseEntity<AnswerResponse> updateAnswer(@PathVariable("id") Long idAnswer,
-            @RequestBody AnswerRequest answerRequest) {
+                                                       @RequestBody AnswerRequest answerRequest) {
         AnswerResponse answer = answerService.updateAnswer(idAnswer, answerRequest);
         return new ResponseEntity<>(answer, HttpStatus.OK);
     }
@@ -61,5 +61,24 @@ public class AnswerController {
     public ResponseEntity<String> deleteAnswer(@PathVariable("id") Long idAnswer) {
         answerService.deleteAnswer(idAnswer);
         return new ResponseEntity<>("Answer deleted successfully", HttpStatus.OK);
+    }
+
+    @AuditAnnotation(ENTITY_NAME)
+    @PatchMapping("/verified/{idQuestion}/{idAnswer}")
+    public void verifyAnswer(@PathVariable("idQuestion") Long idQuestion, @PathVariable("idAnswer") Long idAnswer) {
+        answerService.verifiedAnswer(idQuestion, idAnswer);
+    }
+
+    @AuditAnnotation(ENTITY_NAME)
+    @PatchMapping("/unverified/{idQuestion}/{idAnswer}")
+    public void removeVerifiedAnswer(@PathVariable("idQuestion") Long idQuestion, @PathVariable("idAnswer") Long idAnswer) {
+        answerService.removeVerifiedAnswer(idQuestion, idAnswer);
+    }
+
+    @AuditAnnotation(ENTITY_NAME)
+    @GetMapping("/verifiedByQuestion/{idQuestion}")
+    public ResponseEntity<AnswerResponse> getVerifiedByQuestion(@PathVariable("idQuestion") Long idQuestion) {
+        AnswerResponse answer = answerService.getAnswerVerifiedByQuestionId(idQuestion);
+        return new ResponseEntity<>(answer, HttpStatus.OK);
     }
 }

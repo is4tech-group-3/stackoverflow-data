@@ -15,4 +15,10 @@ public interface AnswerService {
     AnswerResponse updateAnswer(Long idAnswer, AnswerRequest answerRequest);
 
     void deleteAnswer(Long idAnswer);
+
+    void verifiedAnswer(Long idQuestion, Long idAnswer);
+
+    void removeVerifiedAnswer(Long idQuestion, Long idAnswer);
+
+    AnswerResponse getAnswerVerifiedByQuestionId(Long idQuestion);
 }
