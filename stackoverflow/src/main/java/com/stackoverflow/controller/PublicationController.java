@@ -27,7 +27,6 @@ public class PublicationController {
         return new ResponseEntity<>(publication, HttpStatus.CREATED);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping
     public ResponseEntity<Page<PublicationResponse>> getPublications(
             @RequestParam(defaultValue = "0") int page,
@@ -38,7 +37,6 @@ public class PublicationController {
         return new ResponseEntity<>(publications, HttpStatus.OK);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{id}")
     public ResponseEntity<PublicationResponse> getPublicationById(@PathVariable("id") Long id) {
         PublicationResponse publication = publicationService.findPublicationById(id);
@@ -58,5 +56,16 @@ public class PublicationController {
     public ResponseEntity<String> deletePublication(@PathVariable("id") Long id) {
         publicationService.deletePublication(id);
         return new ResponseEntity<>("Publication deleted successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/findByTag/{idTag}")
+    public ResponseEntity<Page<PublicationResponse>> getPublicationsByTag(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "dateCreation") String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "desc") String sortDirection,
+            @PathVariable("idTag") Long idTag) {
+        Page<PublicationResponse> publications = publicationService.getPublicationsByTag(page,size, sortBy, sortDirection, idTag);
+        return new ResponseEntity<>(publications, HttpStatus.OK);
     }
 }
