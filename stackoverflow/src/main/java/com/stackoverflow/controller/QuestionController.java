@@ -26,7 +26,6 @@ public class QuestionController {
         return new ResponseEntity<>(question, HttpStatus.CREATED);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping
     public Page<Question> getQuestions(
             @RequestParam(defaultValue = "0") int page,
@@ -36,14 +35,12 @@ public class QuestionController {
         return questionService.getAllQuestions(page, size, sortBy, sortDirection);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{id}")
     public ResponseEntity<Question> getQuestion(@PathVariable(name = "id") Long id) {
         Question question = questionService.getQuestion(id);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @PutMapping("/{id}")
     public ResponseEntity<Question> updateQuestion(@PathVariable(name = "id") Long id,
             @RequestBody QuestionRequest questionRequest) {

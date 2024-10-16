@@ -1,6 +1,5 @@
 package com.stackoverflow.controller;
 
-import com.stackoverflow.bo.Comment;
 import com.stackoverflow.dto.comment.CommentRequest;
 import com.stackoverflow.dto.comment.CommentResponse;
 import com.stackoverflow.service.comment.CommentService;
@@ -11,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -32,7 +29,6 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{idPublication}")
     public ResponseEntity<Page<CommentResponse>> getComments(
             @PathVariable("idPublication") Long idPublication,
@@ -46,7 +42,6 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/findById/{id}")
     public ResponseEntity<CommentResponse> getComment(@PathVariable("id") Long idComment) {
         CommentResponse comment = commentService.findCommentById(idComment);
