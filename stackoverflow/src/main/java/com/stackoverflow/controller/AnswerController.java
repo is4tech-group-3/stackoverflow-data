@@ -28,7 +28,6 @@ public class AnswerController {
         return new ResponseEntity<>(answer, HttpStatus.CREATED);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/{idQuestion}")
     public ResponseEntity<Page<AnswerResponse>> getAllAnswers(
             @PathVariable("idQuestion") Long idQuestion,
@@ -41,7 +40,6 @@ public class AnswerController {
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/findById/{id}")
     public ResponseEntity<AnswerResponse> findAnswerById(@PathVariable("id") Long idAnswer) {
         AnswerResponse answer = answerService.findAnswerById(idAnswer);
@@ -75,7 +73,6 @@ public class AnswerController {
         answerService.removeVerifiedAnswer(idQuestion, idAnswer);
     }
 
-    @AuditAnnotation(ENTITY_NAME)
     @GetMapping("/verifiedByQuestion/{idQuestion}")
     public ResponseEntity<AnswerResponse> getVerifiedByQuestion(@PathVariable("idQuestion") Long idQuestion) {
         AnswerResponse answer = answerService.getAnswerVerifiedByQuestionId(idQuestion);
