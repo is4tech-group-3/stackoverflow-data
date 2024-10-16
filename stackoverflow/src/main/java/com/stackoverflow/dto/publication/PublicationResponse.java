@@ -21,4 +21,5 @@ public class PublicationResponse {
     private LocalDateTime dateUpdated;
     private UserResponse author;
     private Set<Tag> tags;
+    private String image;
 }
