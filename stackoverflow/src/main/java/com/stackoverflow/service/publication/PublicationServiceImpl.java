@@ -121,6 +121,16 @@ public class PublicationServiceImpl implements PublicationService {
         publicationRepository.deleteById(idPublication);
     }
 
+    @Override
+    public Page<PublicationResponse> getPublicationsByTag(int page, int size, String sortBy, String sortDirection, Long idTag) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Publication> publicationPage = publicationRepository.findByTagsIdTag(idTag, pageable);
+
+        return publicationPage.map(this::createPublicationResponse);
+    }
+
     public PublicationResponse createPublicationResponse(Publication publication) {
         return PublicationResponse.builder()
                 .idPublication(publication.getIdPublication())
