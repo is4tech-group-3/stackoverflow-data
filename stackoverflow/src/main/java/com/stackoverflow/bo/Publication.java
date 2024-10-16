@@ -45,6 +45,9 @@ public class Publication {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "url_image")
+    private String urls;
+
     @ManyToMany
     @JoinTable(
             name = "publication_tag",

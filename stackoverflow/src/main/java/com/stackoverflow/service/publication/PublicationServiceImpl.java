@@ -8,6 +8,7 @@ import com.stackoverflow.dto.publication.PublicationResponse;
 import com.stackoverflow.repository.PublicationRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
+import com.stackoverflow.service.s3.S3Service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -36,16 +37,24 @@ public class PublicationServiceImpl implements PublicationService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
     private final Validator validator;
+    private final S3Service s3Service;
 
     @Override
     public PublicationResponse createPublication(PublicationRequest publicationRequest) {
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(publicationRequest.getIdTags()));
 
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Long userId = ((User) userDetails).getId();
 
         userRepository.findUserResponseById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        String imageUrl = null;
+        if (publicationRequest.getImage() != null && !publicationRequest.getImage().isEmpty()) {
+            String key = s3Service.putObject(publicationRequest.getImage());
+            imageUrl = s3Service.getObjectUrl(key);
+        }
 
         Publication publication = Publication.builder()
                 .title(publicationRequest.getTitle())
@@ -54,6 +63,7 @@ public class PublicationServiceImpl implements PublicationService {
                 .dateUpdated(LocalDateTime.now())
                 .userId(userId)
                 .tags(tags)
+                .urls(imageUrl)
                 .build();
 
         publicationRepository.save(publication);
@@ -62,8 +72,9 @@ public class PublicationServiceImpl implements PublicationService {
     }
 
     @Override
-    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection){
-        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending(); 
+    public Page<PublicationResponse> getPublications(int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Publication> publications = publicationRepository.findAll(pageable);
         return publications.map(this::createPublicationResponse);
@@ -72,16 +83,29 @@ public class PublicationServiceImpl implements PublicationService {
     @Override
     public PublicationResponse findPublicationById(Long idPublication) {
         Publication publication = publicationRepository.findById(idPublication)
-                .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Publication not found with id: " + idPublication));
         return createPublicationResponse(publication);
+    }
+
+    @Override
+    public Page<PublicationResponse> getPublicationsByTag(int page, int size, String sortBy, String sortDirection, Long idTag) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Publication> publicationPage = publicationRepository.findByTagsIdTag(idTag, pageable);
+
+        return publicationPage.map(this::createPublicationResponse);
     }
 
     @Override
     public PublicationResponse updatePublication(Long idPublication, PublicationRequest publicationRequest) {
         Publication publication = publicationRepository.findById(idPublication)
-                .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Publication not found with id: " + idPublication));
 
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Long userId = ((User) userDetails).getId();
 
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
@@ -99,7 +123,8 @@ public class PublicationServiceImpl implements PublicationService {
         publication.setDateUpdated(LocalDateTime.now());
 
         Set<ConstraintViolation<Publication>> violations = validator.validate(publication);
-        if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+        if (!violations.isEmpty())
+            throw new ConstraintViolationException(violations);
 
         publicationRepository.save(publication);
 
@@ -109,8 +134,10 @@ public class PublicationServiceImpl implements PublicationService {
     @Override
     public void deletePublication(Long idPublication) {
         Publication publication = publicationRepository.findById(idPublication)
-                .orElseThrow(() -> new EntityNotFoundException("Publication not found with id: " + idPublication));
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Publication not found with id: " + idPublication));
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Long userId = ((User) userDetails).getId();
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
@@ -119,16 +146,6 @@ public class PublicationServiceImpl implements PublicationService {
             throw new AccessDeniedException("You do not have permission to edit this answer");
         }
         publicationRepository.deleteById(idPublication);
-    }
-
-    @Override
-    public Page<PublicationResponse> getPublicationsByTag(int page, int size, String sortBy, String sortDirection, Long idTag) {
-        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Publication> publicationPage = publicationRepository.findByTagsIdTag(idTag, pageable);
-
-        return publicationPage.map(this::createPublicationResponse);
     }
 
     public PublicationResponse createPublicationResponse(Publication publication) {
@@ -141,8 +158,10 @@ public class PublicationServiceImpl implements PublicationService {
                 .author(
                         userRepository.findUserResponseById(publication.getUserId())
                                 .orElseThrow(() -> new EntityNotFoundException(
-                                        "User not found with id: " + publication.getUserId())))
+                                        "User not found with id: " + publication
+                                                .getUserId())))
                 .tags(publication.getTags())
+                .image(publication.getUrls())
                 .build();
     }
 }
