@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +22,8 @@ public class PublicationController {
     private final String ENTITY_NAME = "PUBLICATION";
 
     @AuditAnnotation(ENTITY_NAME)
-    @PostMapping
-    public ResponseEntity<PublicationResponse> createPublication(@RequestBody PublicationRequest publicationRequest) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PublicationResponse> createPublication(@ModelAttribute PublicationRequest publicationRequest) {
         PublicationResponse publication = publicationService.createPublication(publicationRequest);
         return new ResponseEntity<>(publication, HttpStatus.CREATED);
     }
