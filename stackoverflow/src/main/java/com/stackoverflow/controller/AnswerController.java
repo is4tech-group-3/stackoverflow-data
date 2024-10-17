@@ -40,23 +40,23 @@ public class AnswerController {
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
-    @GetMapping("/findById/{id}")
-    public ResponseEntity<AnswerResponse> findAnswerById(@PathVariable("id") Long idAnswer) {
+    @GetMapping("/findById/{idAnswer}")
+    public ResponseEntity<AnswerResponse> findAnswerById(@PathVariable("idAnswer") Long idAnswer) {
         AnswerResponse answer = answerService.findAnswerById(idAnswer);
         return new ResponseEntity<>(answer, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @PutMapping("/{id}")
-    public ResponseEntity<AnswerResponse> updateAnswer(@PathVariable("id") Long idAnswer,
+    @PutMapping("/{idAnswer}")
+    public ResponseEntity<AnswerResponse> updateAnswer(@PathVariable("idAnswer") Long idAnswer,
                                                        @RequestBody AnswerRequest answerRequest) {
         AnswerResponse answer = answerService.updateAnswer(idAnswer, answerRequest);
         return new ResponseEntity<>(answer, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteAnswer(@PathVariable("id") Long idAnswer) {
+    @DeleteMapping("{idAnswer}")
+    public ResponseEntity<String> deleteAnswer(@PathVariable("idAnswer") Long idAnswer) {
         answerService.deleteAnswer(idAnswer);
         return new ResponseEntity<>("Answer deleted successfully", HttpStatus.OK);
     }

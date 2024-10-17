@@ -42,24 +42,24 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-    @GetMapping("/findById/{id}")
-    public ResponseEntity<CommentResponse> getComment(@PathVariable("id") Long idComment) {
+    @GetMapping("/findById/{idComment}")
+    public ResponseEntity<CommentResponse> getComment(@PathVariable("idComment") Long idComment) {
         CommentResponse comment = commentService.findCommentById(idComment);
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @PutMapping("/{id}")
-    public ResponseEntity<CommentResponse> updateComment(@PathVariable("id") Long id,
+    @PutMapping("/{idComment}")
+    public ResponseEntity<CommentResponse> updateComment(@PathVariable("idComment") Long idComment,
             @RequestBody CommentRequest commentRequest) {
-        CommentResponse comment = commentService.updateComment(id, commentRequest);
+        CommentResponse comment = commentService.updateComment(idComment, commentRequest);
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteComment(@PathVariable("id") Long id) {
-        commentService.deleteComment(id);
+    @DeleteMapping("/{idComment}")
+    public ResponseEntity<String> deleteComment(@PathVariable("idComment") Long idComment) {
+        commentService.deleteComment(idComment);
         return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
     }
 }

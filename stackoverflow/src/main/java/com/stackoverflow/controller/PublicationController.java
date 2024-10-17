@@ -38,24 +38,24 @@ public class PublicationController {
         return new ResponseEntity<>(publications, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PublicationResponse> getPublicationById(@PathVariable("id") Long id) {
-        PublicationResponse publication = publicationService.findPublicationById(id);
+    @GetMapping("/{idPublication}")
+    public ResponseEntity<PublicationResponse> getPublicationById(@PathVariable("idPublication") Long idPublication) {
+        PublicationResponse publication = publicationService.findPublicationById(idPublication);
         return new ResponseEntity<>(publication, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @PutMapping("/{id}")
-    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable("id") Long id,
+    @PutMapping("/{idPublication}")
+    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable("idPublication") Long idPublication,
             @RequestBody PublicationRequest publicationRequest) {
-        PublicationResponse publication = publicationService.updatePublication(id, publicationRequest);
+        PublicationResponse publication = publicationService.updatePublication(idPublication, publicationRequest);
         return new ResponseEntity<>(publication, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePublication(@PathVariable("id") Long id) {
-        publicationService.deletePublication(id);
+    @DeleteMapping("/{idPublication}")
+    public ResponseEntity<String> deletePublication(@PathVariable("idPublication") Long idPublication) {
+        publicationService.deletePublication(idPublication);
         return new ResponseEntity<>("Publication deleted successfully", HttpStatus.OK);
     }
 

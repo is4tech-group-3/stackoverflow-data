@@ -35,23 +35,23 @@ public class QuestionController {
         return questionService.getAllQuestions(page, size, sortBy, sortDirection);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Question> getQuestion(@PathVariable(name = "id") Long id) {
-        Question question = questionService.getQuestion(id);
+    @GetMapping("/{idQuestion}")
+    public ResponseEntity<Question> getQuestion(@PathVariable(name = "idQuestion") Long idQuestion) {
+        Question question = questionService.getQuestion(idQuestion);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Question> updateQuestion(@PathVariable(name = "id") Long id,
+    @PutMapping("/{idQuestion}")
+    public ResponseEntity<Question> updateQuestion(@PathVariable(name = "idQuestion") Long idQuestion,
             @RequestBody QuestionRequest questionRequest) {
-        Question question = questionService.updateQuestion(id, questionRequest);
+        Question question = questionService.updateQuestion(idQuestion, questionRequest);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuestion(@PathVariable(name = "id") Long id) {
-        questionService.deleteQuestion(id);
+    @DeleteMapping("/{idQuestion}")
+    public ResponseEntity<String> deleteQuestion(@PathVariable(name = "idQuestion") Long idQuestion) {
+        questionService.deleteQuestion(idQuestion);
         return new ResponseEntity<>("Question deleted successfully", HttpStatus.OK);
     }
 }

@@ -16,20 +16,20 @@ public class AnswerLikeController {
     private final String ENTITY_NAME = "ANSWER";
 
     @AuditAnnotation(ENTITY_NAME)
-    @PostMapping("/like/{id}")
-    public void giveAnswerLike(@PathVariable("id") Long idAnswer) {
+    @PostMapping("/like/{idAnswer}")
+    public void giveAnswerLike(@PathVariable("idAnswer") Long idAnswer) {
         answerLikeService.giveLike(idAnswer);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @DeleteMapping("/dislike/{id}")
-    public void giveAnswerDislike(@PathVariable("id") Long idAnswer) {
+    @DeleteMapping("/dislike/{idAnswer}")
+    public void giveAnswerDislike(@PathVariable("idAnswer") Long idAnswer) {
         answerLikeService.removeLike(idAnswer);
     }
 
     @AuditAnnotation(ENTITY_NAME)
-    @GetMapping("/likes/{id}")
-    public ResponseEntity<Long> countLikes(@PathVariable("id") Long idAnswer) {
+    @GetMapping("/likes/{idAnswer}")
+    public ResponseEntity<Long> countLikes(@PathVariable("idAnswer") Long idAnswer) {
         Long likes = answerLikeService.countLikes(idAnswer);
         return new ResponseEntity<>(likes, HttpStatus.OK);
     }
