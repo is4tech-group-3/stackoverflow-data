@@ -5,6 +5,7 @@ import com.stackoverflow.bo.Tag;
 import com.stackoverflow.bo.User;
 import com.stackoverflow.dto.question.QuestionRequest;
 import com.stackoverflow.dto.question.QuestionResponse;
+import com.stackoverflow.dto.user.UserResponse;
 import com.stackoverflow.repository.QuestionRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
@@ -41,6 +42,8 @@ public class QuestionServiceImpl implements QuestionService {
     private final Validator validator;
 
     private static final String QUESTION_NOT_FOUND = "Question not found with ID: ";
+    private static final String USER_NOT_FOUND = "User not found with ID: ";
+    private static final String ADMIN = "ROLE_ADMIN";
 
     @Override
     public Page<QuestionResponse> getAllQuestions(int page, int size, String sortBy, String sortDirection) {
@@ -68,7 +71,7 @@ public class QuestionServiceImpl implements QuestionService {
         Long userId = ((User) userDetails).getId();
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND + userId));
 
         Question question = Question.builder()
                 .title(questionRequest.getTitle())
@@ -97,7 +100,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
 
-        if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains("ADMIN")) {
+        if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains(ADMIN)) {
             throw new AccessDeniedException("You do not have permission to edit this question");
         }
 
@@ -126,7 +129,7 @@ public class QuestionServiceImpl implements QuestionService {
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
-        if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains("ADMIN")) {
+        if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains(ADMIN)) {
             throw new AccessDeniedException("You do not have permission to edit this question");
         }
         questionRepository.deleteById(idQuestion);
@@ -140,9 +143,14 @@ public class QuestionServiceImpl implements QuestionService {
                 .dateCreation(question.getDateCreation())
                 .dateUpdate(question.getDateUpdate())
                 .author(
-                        userRepository.findUserResponseById(question.getUser().getId())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                        "User not found with id: " + question.getUser())))
+                        new UserResponse(
+                                question.getUser().getId(),
+                                question.getUser().getName(),
+                                question.getUser().getSurname(),
+                                question.getUser().getUsername(),
+                                question.getUser().getImage()
+                        )
+                )
                 .tags(question.getTags())
                 .build();
     }

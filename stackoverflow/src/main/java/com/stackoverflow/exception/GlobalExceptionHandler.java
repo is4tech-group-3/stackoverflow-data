@@ -99,6 +99,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetail, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<ProblemDetail> handleUnsupportedOperationException(UnsupportedOperationException ex) {
+        errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getMessage());
+        errorDetail.setProperty(DESCRIPTION, "The request for an audit service was wrong");
+        return new ResponseEntity<>(errorDetail, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleException(Exception ex) {
         errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");

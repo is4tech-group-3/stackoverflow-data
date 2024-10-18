@@ -40,6 +40,8 @@ public class PublicationServiceImpl implements PublicationService {
     private final S3Service s3Service;
 
     private static final String PUBLICATION_NOT_FOUND = "Publication not found with ID: ";
+    private static final String USER_NOT_FOUND = "User not found with ID: ";
+    private static final String ADMIN = "ROLE_ADMIN";
 
     @Override
     public PublicationResponse createPublication(PublicationRequest publicationRequest) {
@@ -49,8 +51,8 @@ public class PublicationServiceImpl implements PublicationService {
                 .getPrincipal();
         Long userId = ((User) userDetails).getId();
 
-        if(!userRepository.existsById(userId)) {
-            throw new EntityNotFoundException("User not found with ID: " + userId);
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException(USER_NOT_FOUND + userId);
         }
 
         String imageUrl = null;
@@ -115,7 +117,7 @@ public class PublicationServiceImpl implements PublicationService {
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
 
-        if (!Objects.equals(publication.getUserId(), userId) && !roles.contains("ADMIN")) {
+        if (!Objects.equals(publication.getUserId(), userId) && !roles.contains(ADMIN)) {
             throw new AccessDeniedException("You do not have permission to edit this publication");
         }
 
@@ -145,8 +147,8 @@ public class PublicationServiceImpl implements PublicationService {
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
-        if (!Objects.equals(publication.getUserId(), userId) && !roles.contains("ADMIN")) {
-            throw new AccessDeniedException("You do not have permission to edit this answer");
+        if (!Objects.equals(publication.getUserId(), userId) && !roles.contains(ADMIN)) {
+            throw new AccessDeniedException("You do not have permission to edit this publication");
         }
         publicationRepository.deleteById(idPublication);
     }
@@ -160,9 +162,10 @@ public class PublicationServiceImpl implements PublicationService {
                 .dateUpdated(publication.getDateUpdated())
                 .author(
                         userRepository.findUserResponseById(publication.getUserId())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                        "User not found with id: " + publication
-                                                .getUserId())))
+                                .orElseThrow(
+                                        () -> new EntityNotFoundException("User not found with id: " + publication.getUserId())
+                                )
+                )
                 .tags(publication.getTags())
                 .image(publication.getUrls())
                 .build();
