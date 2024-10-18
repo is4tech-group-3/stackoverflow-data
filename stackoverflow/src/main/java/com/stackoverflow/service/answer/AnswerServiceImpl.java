@@ -43,6 +43,8 @@ public class AnswerServiceImpl implements AnswerService {
 
     private static final String QUESTION_NOT_FOUND = "Question not found with ID: ";
     private static final String ANSWER_NOT_FOUND = "Answer not found with ID: ";
+    private static final String USER_NOT_FOUND = "User not found with ID: ";
+    private static final String ADMIN = "ROLE_ADMIN";
 
     @Override
     public AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest) {
@@ -50,8 +52,8 @@ public class AnswerServiceImpl implements AnswerService {
                 .getPrincipal();
         Long userId = ((User) userDetails).getId();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        if(!questionRepository.existsById(idQuestion)) {
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND + userId));
+        if (!questionRepository.existsById(idQuestion)) {
             throw new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion);
         }
         Answer answer = Answer.builder()
@@ -96,7 +98,7 @@ public class AnswerServiceImpl implements AnswerService {
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
 
-        if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains("ADMIN")) {
+        if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains(ADMIN)) {
             throw new AccessDeniedException("You do not have permission to edit this answer");
         }
 
@@ -123,7 +125,7 @@ public class AnswerServiceImpl implements AnswerService {
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
 
-        if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains("ADMIN")) {
+        if (!Objects.equals(answer.getUser().getId(), userId) && !roles.contains(ADMIN)) {
             throw new AccessDeniedException("You do not have permission to delete this answer");
         }
 
@@ -143,7 +145,10 @@ public class AnswerServiceImpl implements AnswerService {
                 .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + answer.getIdQuestion()));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
-        if (!Objects.equals(question.getUser().getId(), userId))
+        List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().map(GrantedAuthority::getAuthority)
+                .toList();
+        if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains(ADMIN))
             throw new AccessDeniedException("Do not have permission to verify this answer");
 
         answer.setVerified(true);
@@ -155,10 +160,13 @@ public class AnswerServiceImpl implements AnswerService {
         Answer answer = answerRepository.findByIdQuestionAndIdAnswerAndVerifiedTrue(idQuestion, idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException("the answer with the id " + idAnswer + " is not verified"));
         Question question = questionRepository.findById(answer.getIdQuestion())
-                        .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + answer.getIdQuestion()));
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + answer.getIdQuestion()));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
-        if (!Objects.equals(question.getUser().getId(), userId))
+        List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().map(GrantedAuthority::getAuthority)
+                .toList();
+        if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains(ADMIN))
             throw new AccessDeniedException("Do not have permission to remove verification from this answer");
         answer.setVerified(false);
         answerRepository.save(answer);
@@ -184,7 +192,10 @@ public class AnswerServiceImpl implements AnswerService {
                                 answer.getUser().getId(),
                                 answer.getUser().getName(),
                                 answer.getUser().getSurname(),
-                                answer.getUser().getUsername()))
+                                answer.getUser().getUsername(),
+                                answer.getUser().getImage()
+                        )
+                )
                 .build();
     }
 }

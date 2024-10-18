@@ -23,8 +23,8 @@ public class AnswerLikeServiceImpl implements AnswerLikeService {
     public void giveLike(Long idAnswer) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
-        if(userId == null) throw new EntityNotFoundException("user not found to establish relationship");
-        if(!answerRepository.existsById(idAnswer)) {
+        if (userId == null) throw new EntityNotFoundException("user not found to establish relationship");
+        if (!answerRepository.existsById(idAnswer)) {
             throw new EntityNotFoundException("answer not found to establish relationship");
         }
         AnswerLikeId id = AnswerLikeId.builder()
