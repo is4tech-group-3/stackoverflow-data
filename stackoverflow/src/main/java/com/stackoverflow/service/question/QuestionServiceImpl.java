@@ -40,6 +40,8 @@ public class QuestionServiceImpl implements QuestionService {
     private final TagRepository tagRepository;
     private final Validator validator;
 
+    private static final String QUESTION_NOT_FOUND = "Question not found with ID: ";
+
     @Override
     public Page<QuestionResponse> getAllQuestions(int page, int size, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -51,9 +53,10 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+
     public QuestionResponse getQuestion(Long idQuestion) {
         Question question = questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion));
         return createQuestionResponse(question);
     }
 
@@ -84,7 +87,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public QuestionResponse updateQuestion(Long idQuestion, QuestionRequest questionRequest) {
         Question question = questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
@@ -116,17 +119,13 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public void deleteQuestion(Long idQuestion) {
         Question question = questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Question not found with id: " + idQuestion));
-
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-
         Long userId = ((User) userDetails).getId();
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .toList();
-
         if (!Objects.equals(question.getUser().getId(), userId) && !roles.contains("ADMIN")) {
             throw new AccessDeniedException("You do not have permission to edit this question");
         }

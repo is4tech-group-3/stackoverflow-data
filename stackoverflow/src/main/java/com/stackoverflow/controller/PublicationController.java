@@ -19,7 +19,7 @@ public class PublicationController {
 
     private final PublicationService publicationService;
 
-    private final String ENTITY_NAME = "PUBLICATION";
+    private static final String ENTITY_NAME = "PUBLICATION";
 
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

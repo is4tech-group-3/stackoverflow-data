@@ -42,10 +42,9 @@ public class CommentServiceImpl implements CommentService {
 
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-                publicationRepository.findById(idPublication)
-                                .orElseThrow(() -> new EntityNotFoundException("Publication not found"));
-
+                if(!publicationRepository.existsById(idPublication)){
+                        throw new EntityNotFoundException("Publication not found");
+                }
                 Comment comment = Comment.builder()
                         .description(commentRequest.getDescription())
                         .dateCreation(LocalDateTime.now())
@@ -95,8 +94,9 @@ public class CommentServiceImpl implements CommentService {
 
         @Override
         public void deleteComment(Long idComment) {
-                commentRepository.findById(idComment)
-                                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+                if(!commentRepository.existsById(idComment)){
+                        throw new EntityNotFoundException("Comment not found");
+                }
                 commentRepository.deleteById(idComment);
         }
 

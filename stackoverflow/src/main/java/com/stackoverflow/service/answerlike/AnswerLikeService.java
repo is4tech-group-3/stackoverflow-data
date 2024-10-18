@@ -1,4 +1,4 @@
-package com.stackoverflow.service.answerLike;
+package com.stackoverflow.service.answerlike;
 
 public interface AnswerLikeService {
     void giveLike(Long idAnswer);

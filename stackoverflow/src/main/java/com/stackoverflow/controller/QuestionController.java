@@ -17,7 +17,7 @@ public class QuestionController {
 
     private final QuestionService questionService;
 
-    private final String ENTITY_NAME = "QUESTION";
+    private static final String ENTITY_NAME = "QUESTION";
 
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping

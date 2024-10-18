@@ -18,7 +18,7 @@ public class AnswerController {
 
     private final AnswerService answerService;
 
-    private final String ENTITY_NAME = "ANSWER";
+    private static final String ENTITY_NAME = "ANSWER";
 
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping("/{idQuestion}")
