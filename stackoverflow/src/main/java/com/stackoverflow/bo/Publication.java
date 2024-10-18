@@ -31,7 +31,7 @@ public class Publication {
     @NotBlank(message = "Title is required")
     private String title;
 
-    @Size(max = 256, message = "The description must not be longer than 256 characters")
+    @Size(max = 1024, message = "The description must not be longer than 1024 characters")
     @NotNull(message = "The description field cannot be null")
     @NotBlank(message = "Description is required")
     private String description;
