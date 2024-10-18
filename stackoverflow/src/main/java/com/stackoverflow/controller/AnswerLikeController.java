@@ -1,6 +1,6 @@
 package com.stackoverflow.controller;
 
-import com.stackoverflow.service.answerLike.AnswerLikeService;
+import com.stackoverflow.service.answerlike.AnswerLikeService;
 import com.stackoverflow.util.AuditAnnotation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class AnswerLikeController {
     private final AnswerLikeService answerLikeService;
 
-    private final String ENTITY_NAME = "ANSWER";
+    private static final String ENTITY_NAME = "ANSWER";
 
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping("/like/{idAnswer}")

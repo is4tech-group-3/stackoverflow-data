@@ -18,7 +18,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    private final String ENTITY_NAME = "COMMENT";
+    private static final String ENTITY_NAME = "COMMENT";
 
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping("/{idPublication}")

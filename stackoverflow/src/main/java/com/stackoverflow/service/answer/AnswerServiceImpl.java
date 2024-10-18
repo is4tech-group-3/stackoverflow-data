@@ -41,6 +41,9 @@ public class AnswerServiceImpl implements AnswerService {
     private final QuestionRepository questionRepository;
     private final Validator validator;
 
+    private static final String QUESTION_NOT_FOUND = "Question not found with ID: ";
+    private static final String ANSWER_NOT_FOUND = "Answer not found with ID: ";
+
     @Override
     public AnswerResponse createAnswer(Long idQuestion, AnswerRequest answerRequest) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
@@ -48,9 +51,9 @@ public class AnswerServiceImpl implements AnswerService {
         Long userId = ((User) userDetails).getId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Question not found with id: " + idQuestion));
+        if(!questionRepository.existsById(idQuestion)) {
+            throw new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion);
+        }
         Answer answer = Answer.builder()
                 .description(answerRequest.getDescription())
                 .dateCreated(LocalDateTime.now())
@@ -77,14 +80,14 @@ public class AnswerServiceImpl implements AnswerService {
     public AnswerResponse findAnswerById(Long idAnswer) {
         Answer answer = answerRepository.findById(idAnswer)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Answer not found with id: " + idAnswer));
+                        ANSWER_NOT_FOUND + idAnswer));
         return createAnswerResponse(answer);
     }
 
     @Override
     public AnswerResponse updateAnswer(Long idAnswer, AnswerRequest answerRequest) {
         Answer answer = answerRepository.findById(idAnswer)
-                .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
+                .orElseThrow(() -> new EntityNotFoundException(ANSWER_NOT_FOUND + idAnswer));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
@@ -111,7 +114,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     public void deleteAnswer(Long idAnswer) {
         Answer answer = answerRepository.findById(idAnswer)
-                .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + idAnswer));
+                .orElseThrow(() -> new EntityNotFoundException(ANSWER_NOT_FOUND + idAnswer));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
@@ -137,7 +140,7 @@ public class AnswerServiceImpl implements AnswerService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "No answer was found with id " + idAnswer + " pertaining to the question with id " + idQuestion));
         Question question = questionRepository.findById(answer.getIdQuestion())
-                .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + answer.getIdQuestion()));
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + answer.getIdQuestion()));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
         if (!Objects.equals(question.getUser().getId(), userId))
@@ -150,9 +153,9 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     public void removeVerifiedAnswer(Long idQuestion, Long idAnswer) {
         Answer answer = answerRepository.findByIdQuestionAndIdAnswerAndVerifiedTrue(idQuestion, idAnswer)
-                .orElseThrow(() -> new EntityNotFoundException("the response with the id " + idAnswer + " is not verified"));
+                .orElseThrow(() -> new EntityNotFoundException("the answer with the id " + idAnswer + " is not verified"));
         Question question = questionRepository.findById(answer.getIdQuestion())
-                        .orElseThrow(() -> new EntityNotFoundException("Question not found with id: " + answer.getIdQuestion()));
+                        .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + answer.getIdQuestion()));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
         if (!Objects.equals(question.getUser().getId(), userId))

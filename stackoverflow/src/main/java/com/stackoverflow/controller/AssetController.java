@@ -3,7 +3,7 @@ package com.stackoverflow.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,10 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.stackoverflow.dto.s3.Asset;
 import com.stackoverflow.service.s3.S3Service;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/assets")
 public class AssetController {
-    @Autowired
+
     private S3Service s3Service;
 
     @PostMapping("/upload")

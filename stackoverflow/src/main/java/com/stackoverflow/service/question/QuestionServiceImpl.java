@@ -36,6 +36,8 @@ public class QuestionServiceImpl implements QuestionService {
     private TagRepository tagRepository;
     private final Validator validator;
 
+    private static final String QUESTION_NOT_FOUND = "Question not found with ID: ";
+
     @Override
     public Page<Question> getAllQuestions(int page, int size, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
@@ -48,7 +50,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Question getQuestion(Long idQuestion) {
         return questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion));
     }
 
     @Override
@@ -75,7 +77,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Question updateQuestion(Long idQuestion, QuestionRequest questionRequest) {
         Question question = questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+                .orElseThrow(() -> new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion));
 
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(questionRequest.getIdTags()));
         question.setTitle(questionRequest.getTitle());
@@ -91,8 +93,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public void deleteQuestion(Long idQuestion) {
-        questionRepository.findById(idQuestion)
-                .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+        if(!questionRepository.existsById(idQuestion)) {
+            throw new EntityNotFoundException(QUESTION_NOT_FOUND + idQuestion);
+        }
         questionRepository.deleteById(idQuestion);
     }
 }

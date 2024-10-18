@@ -1,4 +1,4 @@
-package com.stackoverflow.service.answerLike;
+package com.stackoverflow.service.answerlike;
 
 
 import com.stackoverflow.bo.AnswerLike;
@@ -24,8 +24,9 @@ public class AnswerLikeServiceImpl implements AnswerLikeService {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = ((User) userDetails).getId();
         if(userId == null) throw new EntityNotFoundException("user not found to establish relationship");
-        answerRepository.findById(idAnswer)
-                .orElseThrow(() -> new EntityNotFoundException("answer not found to establish relationship"));
+        if(!answerRepository.existsById(idAnswer)) {
+            throw new EntityNotFoundException("answer not found to establish relationship");
+        }
         AnswerLikeId id = AnswerLikeId.builder()
                 .userId(userId)
                 .answerId(idAnswer)

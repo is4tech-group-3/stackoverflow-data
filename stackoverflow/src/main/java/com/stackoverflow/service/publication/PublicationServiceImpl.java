@@ -39,6 +39,8 @@ public class PublicationServiceImpl implements PublicationService {
     private final Validator validator;
     private final S3Service s3Service;
 
+    private static final String PUBLICATION_NOT_FOUND = "Publication not found with ID: ";
+
     @Override
     public PublicationResponse createPublication(PublicationRequest publicationRequest) {
         Set<Tag> tags = new HashSet<>(tagRepository.findAllById(publicationRequest.getIdTags()));
@@ -47,8 +49,9 @@ public class PublicationServiceImpl implements PublicationService {
                 .getPrincipal();
         Long userId = ((User) userDetails).getId();
 
-        userRepository.findUserResponseById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        if(!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not found with ID: " + userId);
+        }
 
         String imageUrl = null;
         if (publicationRequest.getImage() != null && !publicationRequest.getImage().isEmpty()) {
@@ -84,7 +87,7 @@ public class PublicationServiceImpl implements PublicationService {
     public PublicationResponse findPublicationById(Long idPublication) {
         Publication publication = publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Publication not found with id: " + idPublication));
+                        PUBLICATION_NOT_FOUND + idPublication));
         return createPublicationResponse(publication);
     }
 
@@ -102,7 +105,7 @@ public class PublicationServiceImpl implements PublicationService {
     public PublicationResponse updatePublication(Long idPublication, PublicationRequest publicationRequest) {
         Publication publication = publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Publication not found with id: " + idPublication));
+                        PUBLICATION_NOT_FOUND + idPublication));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
@@ -135,7 +138,7 @@ public class PublicationServiceImpl implements PublicationService {
     public void deletePublication(Long idPublication) {
         Publication publication = publicationRepository.findById(idPublication)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Publication not found with id: " + idPublication));
+                        PUBLICATION_NOT_FOUND + idPublication));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Long userId = ((User) userDetails).getId();
