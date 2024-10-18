@@ -30,7 +30,7 @@ public class Question {
     @NotBlank(message = "Title is required")
     private String title;
 
-    @Size(max = 255, message = "The description must not be longer than 255 characters")
+    @Size(max = 1024, message = "The description must not be longer than 1024 characters")
     @NotNull(message = "The description field cannot be null")
     @NotBlank(message = "Description is required")
     private String description;
