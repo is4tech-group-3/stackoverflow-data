@@ -1,7 +1,7 @@
 package com.stackoverflow.controller;
 
-import com.stackoverflow.bo.Question;
 import com.stackoverflow.dto.question.QuestionRequest;
+import com.stackoverflow.dto.question.QuestionResponse;
 import com.stackoverflow.service.question.QuestionService;
 import com.stackoverflow.util.AuditAnnotation;
 import lombok.AllArgsConstructor;
@@ -21,13 +21,13 @@ public class QuestionController {
 
     @AuditAnnotation(ENTITY_NAME)
     @PostMapping
-    public ResponseEntity<Question> createQuestion(@RequestBody QuestionRequest questionRequest) {
-        Question question = questionService.createQuestion(questionRequest);
+    public ResponseEntity<QuestionResponse> createQuestion(@RequestBody QuestionRequest questionRequest) {
+        QuestionResponse question = questionService.createQuestion(questionRequest);
         return new ResponseEntity<>(question, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public Page<Question> getQuestions(
+    public Page<QuestionResponse> getQuestions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "dateCreation") String sortBy,
@@ -36,15 +36,15 @@ public class QuestionController {
     }
 
     @GetMapping("/{idQuestion}")
-    public ResponseEntity<Question> getQuestion(@PathVariable(name = "idQuestion") Long idQuestion) {
-        Question question = questionService.getQuestion(idQuestion);
+    public ResponseEntity<QuestionResponse> getQuestion(@PathVariable(name = "idQuestion") Long idQuestion) {
+        QuestionResponse question = questionService.getQuestion(idQuestion);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
     @PutMapping("/{idQuestion}")
-    public ResponseEntity<Question> updateQuestion(@PathVariable(name = "idQuestion") Long idQuestion,
+    public ResponseEntity<QuestionResponse> updateQuestion(@PathVariable(name = "idQuestion") Long idQuestion,
             @RequestBody QuestionRequest questionRequest) {
-        Question question = questionService.updateQuestion(idQuestion, questionRequest);
+        QuestionResponse question = questionService.updateQuestion(idQuestion, questionRequest);
         return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
