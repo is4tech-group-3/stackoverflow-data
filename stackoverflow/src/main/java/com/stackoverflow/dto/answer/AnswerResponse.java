@@ -2,11 +2,15 @@ package com.stackoverflow.dto.answer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.stackoverflow.dto.user.UserResponse;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Data
 public class AnswerResponse {

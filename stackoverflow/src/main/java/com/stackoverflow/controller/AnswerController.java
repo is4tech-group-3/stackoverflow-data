@@ -42,8 +42,11 @@ public class AnswerController {
 
     @GetMapping("/findById/{idAnswer}")
     public ResponseEntity<AnswerResponse> findAnswerById(@PathVariable("idAnswer") Long idAnswer) {
-        AnswerResponse answer = answerService.findAnswerById(idAnswer);
-        return new ResponseEntity<>(answer, HttpStatus.OK);
+        AnswerResponse answerResponse = answerService.findAnswerById(idAnswer);
+        if (answerResponse == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(answerResponse);
     }
 
     @AuditAnnotation(ENTITY_NAME)

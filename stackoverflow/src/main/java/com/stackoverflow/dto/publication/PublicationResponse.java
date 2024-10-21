@@ -3,12 +3,14 @@ package com.stackoverflow.dto.publication;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.stackoverflow.bo.Tag;
 import com.stackoverflow.dto.user.UserResponse;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@AllArgsConstructor
 @Builder
 @Data
 public class PublicationResponse {
