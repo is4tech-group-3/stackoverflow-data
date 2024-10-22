@@ -4,10 +4,12 @@ import com.stackoverflow.bo.Publication;
 import com.stackoverflow.bo.User;
 import com.stackoverflow.dto.publication.PublicationRequest;
 import com.stackoverflow.dto.publication.PublicationResponse;
+import com.stackoverflow.dto.user.UserResponse;
 import com.stackoverflow.repository.PublicationRepository;
 import com.stackoverflow.repository.TagRepository;
 import com.stackoverflow.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -41,6 +44,9 @@ public class PublicationServiceImplTest {
     @Mock
     private TagRepository tagRepository;
 
+    @Mock
+    private Validator validator;
+
     private User mockUser;
     private Publication mockPublication;
 
@@ -63,6 +69,12 @@ public class PublicationServiceImplTest {
         mockPublication.setDateCreation(LocalDateTime.now());
         mockPublication.setUserId(mockUser.getId());
         mockPublication.setTags(new HashSet<>());
+
+            // Configura el mock para devolver un usuario de prueba cuando se llame al método findUserResponseById con el ID 1
+        when(userRepository.findUserResponseById(1L))
+                .thenReturn(Optional.of(new UserResponse(1L, "John Doe", "johndoe@example.com", "jde", "image.png" )));
+
+
     }
 
     @Test
@@ -73,6 +85,7 @@ public class PublicationServiceImplTest {
         request.setIdTags(Set.of(1L)); // Simula tags
 
         // Simular que el usuario existe
+        when(userRepository.existsById(anyLong())).thenReturn(true); // Simular la existencia del usuario
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(mockUser));
         when(publicationRepository.save(any(Publication.class))).thenReturn(mockPublication);
 
@@ -89,6 +102,7 @@ public class PublicationServiceImplTest {
         assertEquals("New Publication", response.getTitle());
         verify(publicationRepository, times(1)).save(any(Publication.class));
     }
+
 
     @Test
     public void testGetPublication() {
